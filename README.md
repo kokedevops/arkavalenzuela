@@ -1,2 +1,0 @@
-# arkavalenzuela
-Plantilla ARKA
