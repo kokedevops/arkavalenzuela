@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.arka.arkavalenzuela.ServletInitializerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-07-12T03:03:02.887Z" hostname="ALIEN" time="0.457">
+  <properties/>
+  <testcase name="testConfigureAddsCorrectSource()" classname="com.arka.arkavalenzuela.ServletInitializerTest" time="0.457"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
