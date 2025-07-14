@@ -1,6 +1,6 @@
-package com.kokedevops.arkavalenzuela.repository;
+package com.arka.arkavalenzuela.repository;
 
-import com.kokedevops.arkavalenzuela.model.Cart;
+import com.arka.arkavalenzuela.model.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

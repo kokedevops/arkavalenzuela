@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.arka.arkavalenzuela.ArkajvalenzuelaApplicationTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-07-12T03:59:48.473Z" hostname="ALIEN" time="0.043">
-  <properties/>
-  <testcase name="testMainApplicationClassExists()" classname="com.arka.arkavalenzuela.ArkajvalenzuelaApplicationTest" time="0.043"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

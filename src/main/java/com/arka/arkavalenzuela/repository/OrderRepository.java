@@ -1,8 +1,8 @@
-package com.kokedevops.arkavalenzuela.repository;
+package com.arka.arkavalenzuela.repository;
 
-import com.kokedevops.arkavalenzuela.model.Order;
-import com.kokedevops.arkavalenzuela.model.Product;
-import com.kokedevops.arkavalenzuela.model.Customer;
+import com.arka.arkavalenzuela.model.Order;
+import com.arka.arkavalenzuela.model.Product;
+import com.arka.arkavalenzuela.model.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
