@@ -16,5 +16,27 @@ public class Category {
     @OneToMany(mappedBy = "categoria")
     private List<Product> productos;
 
-    // Getters y setters
+    public Long getCategoriaId() {
+        return categoriaId;
+    }
+
+    public void setCategoriaId(Long categoriaId) {
+        this.categoriaId = categoriaId;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public List<Product> getProductos() {
+        return productos;
+    }
+
+    public void setProductos(List<Product> productos) {
+        this.productos = productos;
+    }
 }

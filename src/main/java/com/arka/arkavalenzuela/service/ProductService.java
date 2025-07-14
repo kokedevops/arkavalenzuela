@@ -32,6 +32,10 @@ public class ProductService {
     }
 
     public List<Product> findByCategoria(String categoria) {
-        return repository.findByCategoria(categoria);
+        return repository.findByCategoriaNombre(categoria);
+    }
+
+    public List<Product> findByCategoriaNombre(String categoriaNombre) {
+        return repository.findByCategoriaNombre(categoriaNombre);
     }
 }

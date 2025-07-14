@@ -7,8 +7,9 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    // Ejemplo de consulta personalizada:
-    List<Product> findByCategoria(String categoria);
+    // Consultas personalizadas:
+    List<Product> findByCategoriaNombre(String categoriaNombre);
 
     List<Product> findByNombreContainingIgnoreCase(String nombre);
+
 }

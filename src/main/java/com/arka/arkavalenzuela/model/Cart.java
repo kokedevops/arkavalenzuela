@@ -17,7 +17,37 @@ public class Cart {
 
     private LocalDateTime fechaCreacion;
 
-    private String estado; // ej.: ACTIVE, ABANDONED
+    private String estado;
 
-    // Getters y setters
+    public Long getCarritoId() {
+        return carritoId;
+    }
+
+    public void setCarritoId(Long carritoId) {
+        this.carritoId = carritoId;
+    }
+
+    public Customer getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Customer cliente) {
+        this.cliente = cliente;
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 }

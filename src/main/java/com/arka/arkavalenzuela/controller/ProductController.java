@@ -1,7 +1,11 @@
 package com.arka.arkavalenzuela.controller;
 
+import com.arka.arkavalenzuela.dto.ProductDTO;
+import com.arka.arkavalenzuela.model.Category;
 import com.arka.arkavalenzuela.model.Product;
 import com.arka.arkavalenzuela.service.ProductService;
+import com.arka.arkavalenzuela.repository.CategoryRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +18,11 @@ import java.util.stream.Collectors;
 public class ProductController {
 
     private final ProductService productService;
+    private final CategoryRepository categoryRepository;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, CategoryRepository categoryRepository) {
         this.productService = productService;
+        this.categoryRepository = categoryRepository;
     }
 
     // GET /productos
@@ -37,9 +43,34 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/categoria/{nombre}")
+    public ResponseEntity<List<Product>> getByCategory(@PathVariable String nombre) {
+        List<Product> products = productService.findByCategoriaNombre(nombre);
+        return ResponseEntity.ok(products);
+    }
+
+
     // POST /productos
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<?> createProduct(@RequestBody ProductDTO dto) {
+        // Validar que la categoría existe
+        Category category = categoryRepository.findById(dto.getCategoriaId())
+            .orElse(null);
+        
+        if (category == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Error: Categoría con ID " + dto.getCategoriaId() + " no encontrada. "
+                    + "Primero debe crear la categoría usando POST /categorias");
+        }
+
+        Product product = new Product();
+        product.setNombre(dto.getNombre());
+        product.setDescripcion(dto.getDescripcion());
+        product.setCategoria(category);
+        product.setMarca(dto.getMarca());
+        product.setPrecioUnitario(dto.getPrecioUnitario());
+        product.setStock(dto.getStock());
+
         Product savedProduct = productService.save(product);
         return ResponseEntity.ok(savedProduct);
     }
@@ -51,7 +82,7 @@ public class ProductController {
         if (existingProduct != null) {
             existingProduct.setNombre(product.getNombre());
             existingProduct.setDescripcion(product.getDescripcion());
-            existingProduct.setCategoria(product.getCategoria());
+            // Note: Para actualizar categoría, necesitarías otro DTO o manejar el ID
             existingProduct.setMarca(product.getMarca());
             existingProduct.setPrecioUnitario(product.getPrecioUnitario());
             existingProduct.setStock(product.getStock());

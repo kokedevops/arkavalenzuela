@@ -15,5 +15,43 @@ public class Supplier {
     private String telefono;
     private String pais;
 
-    // Getters y setters
+    public Long getProveedorId() {
+        return proveedorId;
+    }
+
+    public void setProveedorId(Long proveedorId) {
+        this.proveedorId = proveedorId;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getEmailContacto() {
+        return emailContacto;
+    }
+
+    public void setEmailContacto(String emailContacto) {
+        this.emailContacto = emailContacto;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getPais() {
+        return pais;
+    }
+
+    public void setPais(String pais) {
+        this.pais = pais;
+    }
 }

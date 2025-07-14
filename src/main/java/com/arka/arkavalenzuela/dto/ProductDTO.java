@@ -1,49 +1,18 @@
-package com.arka.arkavalenzuela.model;
-
-import jakarta.persistence.*;
+package com.arka.arkavalenzuela.dto;
 
 import java.math.BigDecimal;
 
-
-
-@Entity
-@Table(name = "productos")
-public class Product {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productoId;
-
-    @Column(nullable = false)
+public class ProductDTO {
     private String nombre;
-
-    @Column
     private String descripcion;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoria_id")
-    private Category categoria;
-
-    @Column
+    private Long categoriaId;
     private String marca;
-
-    @Column(name = "precio_unitario", precision = 12, scale = 2)
     private BigDecimal precioUnitario;
-
-    @Column
     private Integer stock;
 
-    public Product() {}
+    public ProductDTO() {}
 
     // Getters y Setters
-    public Long getProductoId() {
-        return productoId;
-    }
-
-    public void setProductoId(Long productoId) {
-        this.productoId = productoId;
-    }
-
     public String getNombre() {
         return nombre;
     }
@@ -60,12 +29,12 @@ public class Product {
         this.descripcion = descripcion;
     }
 
-    public Category getCategoria() {
-        return categoria;
+    public Long getCategoriaId() {
+        return categoriaId;
     }
 
-    public void setCategoria(Category categoria) {
-        this.categoria = categoria;
+    public void setCategoriaId(Long categoriaId) {
+        this.categoriaId = categoriaId;
     }
 
     public String getMarca() {
@@ -92,4 +61,3 @@ public class Product {
         this.stock = stock;
     }
 }
-

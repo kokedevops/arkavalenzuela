@@ -1,4 +1,3 @@
-
 package com.arka.arkavalenzuela.model;
 
 import jakarta.persistence.*;
@@ -24,11 +23,49 @@ public class Order {
 
     @ManyToMany
     @JoinTable(
-        name = "pedido_producto",
-        joinColumns = @JoinColumn(name = "pedido_id"),
-        inverseJoinColumns = @JoinColumn(name = "producto_id")
+            name = "pedido_producto",
+            joinColumns = @JoinColumn(name = "pedido_id"),
+            inverseJoinColumns = @JoinColumn(name = "producto_id")
     )
     private Set<Product> productos;
 
-    // Getters y setters
+    public Long getPedidoId() {
+        return pedidoId;
+    }
+
+    public void setPedidoId(Long pedidoId) {
+        this.pedidoId = pedidoId;
+    }
+
+    public Customer getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Customer cliente) {
+        this.cliente = cliente;
+    }
+
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDateTime fecha) {
+        this.fecha = fecha;
+    }
+
+    public BigDecimal getTotal() {
+        return total;
+    }
+
+    public void setTotal(BigDecimal total) {
+        this.total = total;
+    }
+
+    public Set<Product> getProductos() {
+        return productos;
+    }
+
+    public void setProductos(Set<Product> productos) {
+        this.productos = productos;
+    }
 }
