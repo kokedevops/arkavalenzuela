@@ -2,36 +2,41 @@ package com.arka.arkavalenzuela.infrastructure.config;
 
 import com.arka.arkavalenzuela.domain.port.in.*;
 import com.arka.arkavalenzuela.domain.port.out.*;
-import com.arka.arkavalenzuela.domain.service.*;
+import com.arka.arkavalenzuela.application.usecase.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Bean Configuration for Hexagonal Architecture
+ * This class configures the dependency injection for the application layer
+ * Following Hexagonal Architecture - Configuration Layer
+ */
 @Configuration
 public class BeanConfiguration {
 
     @Bean
     public ProductUseCase productUseCase(ProductRepositoryPort productRepository, 
                                        CategoryRepositoryPort categoryRepository) {
-        return new ProductDomainService(productRepository, categoryRepository);
+        return new ProductApplicationService(productRepository, categoryRepository);
     }
 
     @Bean
     public CategoryUseCase categoryUseCase(CategoryRepositoryPort categoryRepository) {
-        return new CategoryDomainService(categoryRepository);
+        return new CategoryApplicationService(categoryRepository);
     }
 
     @Bean
     public CustomerUseCase customerUseCase(CustomerRepositoryPort customerRepository) {
-        return new CustomerDomainService(customerRepository);
+        return new CustomerApplicationService(customerRepository);
     }
 
     @Bean
     public OrderUseCase orderUseCase(OrderRepositoryPort orderRepository) {
-        return new OrderDomainService(orderRepository);
+        return new OrderApplicationService(orderRepository);
     }
 
     @Bean
     public CartUseCase cartUseCase(CartRepositoryPort cartRepository) {
-        return new CartDomainService(cartRepository);
+        return new CartApplicationService(cartRepository);
     }
 }

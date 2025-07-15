@@ -8,46 +8,810 @@
 
 ## 🏗️ Arquitectura del Sistema
 
-### Tecnologías Utilizadas
+### 🛠️ Tecnologías Utilizadas
 - **Java 21**
 - **Spring Boot 3.5.3**
 - **Spring Data JPA**
 - **MySQL** (Base de datos principal)
 - **H2** (Base de datos para testing)
-- **Gradle** (Gestión de dependencias)
+- **Gradle** (Gestión de dependencias y build)
 
-### Patrón Arquitectónico
-- **Arquitectura Hexagonal** (Clean Architecture)
+### 🎯 Patrón Arquitectónico
+- **Arquitectura Hexagonal** (Clean Architecture/Ports and Adapters)
 - **Domain-Driven Design (DDD)**
 - **Principios SOLID**
+- **Inversión de Dependencias**
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Estructura Completa del Proyecto
 
 ```
 src/main/java/com/arka/arkavalenzuela/
+│
 ├── 🟡 DOMAIN (Núcleo del Negocio)
+│   ├── model/                           📊 Entidades de Dominio
+│   │   ├── Product.java                 🛍️ Producto del sistema
+│   │   ├── Category.java                📂 Categoría de productos
+│   │   ├── Customer.java                👤 Cliente del sistema
+│   │   ├── Order.java                   📋 Pedido realizado
+│   │   └── Cart.java                    🛒 Carrito de compras
+│   └── port/                            🔌 Contratos/Interfaces
+│       ├── in/                          📥 Puertos de Entrada (Use Cases)
+│       │   ├── ProductUseCase.java      🛍️ Casos de uso de Producto
+│       │   ├── CategoryUseCase.java     📂 Casos de uso de Categoría
+│       │   ├── CustomerUseCase.java     👤 Casos de uso de Cliente
+│       │   ├── OrderUseCase.java        📋 Casos de uso de Pedido
+│       │   └── CartUseCase.java         🛒 Casos de uso de Carrito
+│       └── out/                         📤 Puertos de Salida (Repository)
+│           ├── ProductRepositoryPort.java    🗃️ Contrato repo Producto
+│           ├── CategoryRepositoryPort.java   🗃️ Contrato repo Categoría
+│           ├── CustomerRepositoryPort.java   🗃️ Contrato repo Cliente
+│           ├── OrderRepositoryPort.java      🗃️ Contrato repo Pedido
+│           └── CartRepositoryPort.java       🗃️ Contrato repo Carrito
+│
 ├── 🟢 APPLICATION (Casos de Uso)
+│   └── usecase/                         🎯 Servicios de Aplicación
+│       ├── ProductApplicationService.java    🛍️ Servicio app Producto
+│       ├── CategoryApplicationService.java   📂 Servicio app Categoría
+│       ├── CustomerApplicationService.java   👤 Servicio app Cliente
+│       ├── OrderApplicationService.java      📋 Servicio app Pedido
+│       └── CartApplicationService.java       🛒 Servicio app Carrito
+│
 ├── 🔵 INFRASTRUCTURE (Detalles Técnicos)
-└── 🔴 MAIN (Punto de Entrada)
+│   ├── adapter/
+│   │   ├── in/                          📥 Adaptadores de Entrada
+│   │   │   └── web/                     🌐 Capa Web (REST API)
+│   │   │       ├── ProductController.java     🎮 Controlador Producto
+│   │   │       ├── CategoryController.java    🎮 Controlador Categoría
+│   │   │       ├── CustomerController.java    🎮 Controlador Cliente
+│   │   │       ├── dto/                 📋 Data Transfer Objects
+│   │   │       │   ├── ProductDTO.java       📄 DTO Producto
+│   │   │       │   ├── CategoryDTO.java      📄 DTO Categoría
+│   │   │       │   └── CustomerDTO.java      📄 DTO Cliente
+│   │   │       └── mapper/              🔄 Mappers Web
+│   │   │           ├── ProductWebMapper.java   🔄 Mapper DTO→Domain
+│   │   │           ├── CategoryWebMapper.java  🔄 Mapper DTO→Domain
+│   │   │           └── CustomerWebMapper.java  🔄 Mapper DTO→Domain
+│   │   └── out/                         📤 Adaptadores de Salida
+│   │       └── persistence/             🗄️ Capa de Persistencia
+│   │           ├── entity/              🗃️ Entidades JPA
+│   │           │   ├── ProductJpaEntity.java   🗃️ Entidad JPA Producto
+│   │           │   ├── CategoryJpaEntity.java  🗃️ Entidad JPA Categoría
+│   │           │   ├── CustomerJpaEntity.java  🗃️ Entidad JPA Cliente
+│   │           │   ├── OrderJpaEntity.java     🗃️ Entidad JPA Pedido
+│   │           │   └── CartJpaEntity.java      🗃️ Entidad JPA Carrito
+│   │           ├── repository/          🗂️ Repositorios JPA
+│   │           │   ├── ProductJpaRepository.java    📚 Repo JPA Producto
+│   │           │   ├── CategoryJpaRepository.java   📚 Repo JPA Categoría
+│   │           │   ├── CustomerJpaRepository.java   📚 Repo JPA Cliente
+│   │           │   ├── OrderJpaRepository.java      📚 Repo JPA Pedido
+│   │           │   └── CartJpaRepository.java       📚 Repo JPA Carrito
+│   │           ├── mapper/              🔄 Mappers Persistencia
+│   │           │   ├── ProductPersistenceMapper.java   🔄 Domain↔Entity
+│   │           │   ├── CategoryPersistenceMapper.java  🔄 Domain↔Entity
+│   │           │   ├── CustomerPersistenceMapper.java  🔄 Domain↔Entity
+│   │           │   ├── OrderPersistenceMapper.java     🔄 Domain↔Entity
+│   │           │   └── CartPersistenceMapper.java      🔄 Domain↔Entity
+│   │           ├── ProductPersistenceAdapter.java      🔌 Adaptador Producto
+│   │           ├── CategoryPersistenceAdapter.java     🔌 Adaptador Categoría
+│   │           ├── CustomerPersistenceAdapter.java     🔌 Adaptador Cliente
+│   │           ├── OrderPersistenceAdapter.java        🔌 Adaptador Pedido
+│   │           └── CartPersistenceAdapter.java         🔌 Adaptador Carrito
+│   └── config/                          ⚙️ Configuración
+│       └── BeanConfiguration.java       🔧 Configuración Spring Beans
+│
+├── 🔴 MAIN (Punto de Entrada)
+│   ├── ArkajvalenzuelaApplication.java  🚀 Aplicación Principal
+│   └── ServletInitializer.java         🌐 Inicializador WAR
+│
+└── resources/
+    ├── application.properties           ⚙️ Configuración App
+    └── application-test.properties      🧪 Configuración Tests
 ```
 
 ---
 
-## 🟡 CAPA DE DOMINIO
+## 🟡 CAPA DE DOMINIO (DOMAIN)
 
-### 📊 Modelos de Dominio
+### 🎯 **Propósito**: Contiene la lógica de negocio pura, reglas del dominio y entidades sin dependencias técnicas.
 
-#### 1. **Product.java**
+### 📊 **1. Modelos de Dominio** (`domain/model/`)
+
+Entidades que representan conceptos del negocio sin anotaciones técnicas (sin JPA, sin Spring):
+
+#### 🛍️ **Product.java**
 ```java
 public class Product {
     private Long id;
     private String nombre;
     private String descripcion;
-    private Category categoria;
+    private Category categoria;      // Relación con categoría
     private String marca;
     private BigDecimal precioUnitario;
+    private Integer stock;
+    
+    // Lógica de negocio pura
+    public boolean hasValidPrice() {
+        return precioUnitario != null && precioUnitario.compareTo(BigDecimal.ZERO) > 0;
+    }
+    
+    public boolean isInStock() {
+        return stock != null && stock > 0;
+    }
+}
+```
+**🎯 Función**: Representa un producto del catálogo con su lógica de negocio.
+
+#### 📂 **Category.java**
+```java
+public class Category {
+    private Long id;
+    private String nombre;
+    
+    // Validaciones de dominio
+    public boolean isValidName() {
+        return nombre != null && !nombre.trim().isEmpty();
+    }
+}
+```
+**🎯 Función**: Representa una categoría de productos.
+
+#### 👤 **Customer.java**
+```java
+public class Customer {
+    private Long id;
+    private String nombre;
+    private String email;
+    private String telefono;
+    private String ciudad;
+    private String pais;
+    
+    // Lógica de negocio
+    public boolean isValidEmail() {
+        return email != null && email.contains("@");
+    }
+}
+```
+**🎯 Función**: Representa un cliente del sistema.
+
+#### 📋 **Order.java**
+```java
+public class Order {
+    private Long id;
+    private Customer cliente;
+    private List<Product> productos;
+    private LocalDateTime fecha;
+    private BigDecimal total;
+    
+    // Lógica de negocio
+    public BigDecimal calculateTotal() {
+        return productos.stream()
+            .map(Product::getPrecioUnitario)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    
+    public boolean isValidOrder() {
+        return productos != null && !productos.isEmpty() && cliente != null;
+    }
+}
+```
+**🎯 Función**: Representa un pedido realizado por un cliente.
+
+#### 🛒 **Cart.java**
+```java
+public class Cart {
+    private Long id;
+    private Customer cliente;
+    private LocalDateTime fechaCreacion;
+    private String estado;
+    
+    // Estados válidos del carrito
+    public boolean isActive() {
+        return "ACTIVE".equals(estado);
+    }
+}
+```
+**🎯 Función**: Representa un carrito de compras.
+
+### 🔌 **2. Puertos (Contratos)** (`domain/port/`)
+
+#### 📥 **Puertos de Entrada** (`domain/port/in/`)
+Definen **QUÉ** puede hacer el sistema (casos de uso):
+
+#### 🛍️ **ProductUseCase.java**
+```java
+public interface ProductUseCase {
+    List<Product> getAllProducts();
+    Product getProductById(Long id);
+    Product createProduct(Product product);
+    Product updateProduct(Long id, Product product);
+    void deleteProduct(Long id);
+    List<Product> getProductsByCategory(String categoryName);
+    List<Product> searchProductsByName(String name);
+    List<Product> getProductsByPriceRange(BigDecimal min, BigDecimal max);
+    List<Product> getAllProductsSorted();
+}
+```
+**🎯 Función**: Define todos los casos de uso relacionados con productos.
+
+#### 📂 **CategoryUseCase.java**
+```java
+public interface CategoryUseCase {
+    List<Category> getAllCategories();
+    Category getCategoryById(Long id);
+    Category createCategory(Category category);
+    Category updateCategory(Long id, Category category);
+    void deleteCategory(Long id);
+}
+```
+**🎯 Función**: Define casos de uso para gestión de categorías.
+
+#### 👤 **CustomerUseCase.java**
+```java
+public interface CustomerUseCase {
+    List<Customer> getAllCustomers();
+    Customer getCustomerById(Long id);
+    Customer createCustomer(Customer customer);
+    Customer updateCustomer(Long id, Customer customer);
+    void deleteCustomer(Long id);
+    List<Customer> searchCustomersByName(String name);
+    List<Customer> getAllCustomersSorted();
+}
+```
+**🎯 Función**: Define casos de uso para gestión de clientes.
+
+#### 📤 **Puertos de Salida** (`domain/port/out/`)
+Definen **CÓMO** el dominio accede a datos externos:
+
+#### 🗃️ **ProductRepositoryPort.java**
+```java
+public interface ProductRepositoryPort {
+    List<Product> findAll();
+    Optional<Product> findById(Long id);
+    Product save(Product product);
+    void deleteById(Long id);
+    boolean existsById(Long id);
+    List<Product> findByCategoriaNombre(String categoryName);
+    List<Product> findByNombreContainingIgnoreCase(String name);
+    List<Product> findByPriceRange(BigDecimal min, BigDecimal max);
+}
+```
+**🎯 Función**: Contrato para persistencia de productos (sin implementación).
+
+---
+
+## 🟢 CAPA DE APLICACIÓN (APPLICATION)
+
+### 🎯 **Propósito**: Orquesta casos de uso, coordina servicios de dominio, implementa la lógica de aplicación.
+
+### 🎯 **Servicios de Aplicación** (`application/usecase/`)
+
+#### 🛍️ **ProductApplicationService.java**
+```java
+@Service
+public class ProductApplicationService implements ProductUseCase {
+    
+    private final ProductRepositoryPort productRepository;
+    private final CategoryRepositoryPort categoryRepository;
+    
+    public ProductApplicationService(ProductRepositoryPort productRepository, 
+                                   CategoryRepositoryPort categoryRepository) {
+        this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+    }
+    
+    @Override
+    public Product createProduct(Product product) {
+        // 1. Validar producto (lógica de aplicación)
+        validateProduct(product);
+        
+        // 2. Validar que categoría existe
+        validateCategoryExists(product.getCategoria().getId());
+        
+        // 3. Guardar producto
+        return productRepository.save(product);
+    }
+    
+    // Lógica de validación de aplicación
+    private void validateProduct(Product product) {
+        if (product.getNombre() == null || product.getNombre().trim().isEmpty()) {
+            throw new IllegalArgumentException("Product name cannot be empty");
+        }
+        if (!product.hasValidPrice()) {
+            throw new IllegalArgumentException("Product must have a valid price");
+        }
+    }
+}
+```
+**🎯 Función**: Implementa casos de uso de productos, orquesta validaciones y persistencia.
+
+#### 📂 **CategoryApplicationService.java**
+```java
+@Service
+public class CategoryApplicationService implements CategoryUseCase {
+    
+    private final CategoryRepositoryPort categoryRepository;
+    
+    @Override
+    public Category createCategory(Category category) {
+        validateCategory(category);
+        return categoryRepository.save(category);
+    }
+    
+    private void validateCategory(Category category) {
+        if (category == null) {
+            throw new IllegalArgumentException("Category cannot be null");
+        }
+        if (category.getNombre() == null || category.getNombre().trim().isEmpty()) {
+            throw new IllegalArgumentException("Category name cannot be null or empty");
+        }
+    }
+}
+```
+**🎯 Función**: Implementa casos de uso de categorías.
+
+---
+
+## 🔵 CAPA DE INFRAESTRUCTURA (INFRASTRUCTURE)
+
+### 🎯 **Propósito**: Implementa detalles técnicos, frameworks, bases de datos, APIs REST.
+
+### 📥 **Adaptadores de Entrada** (`infrastructure/adapter/in/web/`)
+
+#### 🎮 **Controladores REST**
+
+#### 🛍️ **ProductController.java**
+```java
+@RestController
+@RequestMapping("/productos")
+public class ProductController {
+    
+    private final ProductUseCase productUseCase;
+    private final ProductWebMapper webMapper;
+    
+    @GetMapping
+    public List<ProductDTO> getAllProducts() {
+        List<Product> products = productUseCase.getAllProducts();
+        return webMapper.toDTO(products);
+    }
+    
+    @PostMapping
+    public ProductDTO createProduct(@RequestBody ProductDTO productDTO) {
+        Product product = webMapper.toDomain(productDTO);
+        Product savedProduct = productUseCase.createProduct(product);
+        return webMapper.toDTO(savedProduct);
+    }
+}
+```
+**🎯 Función**: Expone endpoints REST para productos, convierte DTOs ↔ Domain.
+
+#### 📋 **DTOs (Data Transfer Objects)** (`infrastructure/adapter/in/web/dto/`)
+
+#### 🛍️ **ProductDTO.java**
+```java
+public class ProductDTO {
+    private Long id;
+    private String nombre;
+    private String descripcion;
+    private Long categoriaId;    // Solo ID, no objeto completo
+    private String marca;
+    private BigDecimal precioUnitario;
+    private Integer stock;
+    
+    // Getters y setters
+}
+```
+**🎯 Función**: Estructura de datos para API REST, optimizada para transferencia.
+
+#### 🔄 **Mappers Web** (`infrastructure/adapter/in/web/mapper/`)
+
+#### 🛍️ **ProductWebMapper.java**
+```java
+@Component
+public class ProductWebMapper {
+    
+    private final CategoryRepositoryPort categoryRepository;
+    
+    public ProductDTO toDTO(Product product) {
+        ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
+        dto.setNombre(product.getNombre());
+        dto.setCategoriaId(product.getCategoria().getId());
+        return dto;
+    }
+    
+    public Product toDomain(ProductDTO dto) {
+        Product product = new Product();
+        product.setId(dto.getId());
+        product.setNombre(dto.getNombre());
+        
+        // Cargar categoría completa
+        Category categoria = categoryRepository.findById(dto.getCategoriaId())
+            .orElseThrow(() -> new RuntimeException("Category not found"));
+        product.setCategoria(categoria);
+        
+        return product;
+    }
+}
+```
+**🎯 Función**: Convierte entre DTOs (API) y entidades de Dominio.
+
+### 📤 **Adaptadores de Salida** (`infrastructure/adapter/out/persistence/`)
+
+#### 🗃️ **Entidades JPA** (`infrastructure/adapter/out/persistence/entity/`)
+
+#### 🛍️ **ProductJpaEntity.java**
+```java
+@Entity
+@Table(name = "productos")
+public class ProductJpaEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "producto_id")
+    private Long id;
+    
+    @Column(name = "nombre", nullable = false)
+    private String nombre;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
+    private CategoryJpaEntity categoria;
+    
+    @Column(name = "precio_unitario", precision = 12, scale = 2)
+    private BigDecimal precioUnitario;
+    
+    // Getters y setters
+}
+```
+**🎯 Función**: Entidad JPA con anotaciones de base de datos, separada del dominio.
+
+#### 📚 **Repositorios JPA** (`infrastructure/adapter/out/persistence/repository/`)
+
+#### 🛍️ **ProductJpaRepository.java**
+```java
+@Repository
+public interface ProductJpaRepository extends JpaRepository<ProductJpaEntity, Long> {
+    
+    List<ProductJpaEntity> findByCategoriaNombre(String categoryName);
+    
+    List<ProductJpaEntity> findByNombreContainingIgnoreCase(String name);
+    
+    @Query("SELECT p FROM ProductJpaEntity p WHERE p.precioUnitario BETWEEN :min AND :max")
+    List<ProductJpaEntity> findByPriceRange(@Param("min") BigDecimal min, 
+                                          @Param("max") BigDecimal max);
+}
+```
+**🎯 Función**: Repositorio JPA con consultas específicas de base de datos.
+
+#### 🔄 **Mappers de Persistencia** (`infrastructure/adapter/out/persistence/mapper/`)
+
+#### 🛍️ **ProductPersistenceMapper.java**
+```java
+@Component
+public class ProductPersistenceMapper {
+    
+    private final CategoryPersistenceMapper categoryMapper;
+    
+    public ProductJpaEntity toEntity(Product product) {
+        ProductJpaEntity entity = new ProductJpaEntity();
+        entity.setId(product.getId());
+        entity.setNombre(product.getNombre());
+        entity.setCategoria(categoryMapper.toEntity(product.getCategoria()));
+        entity.setPrecioUnitario(product.getPrecioUnitario());
+        return entity;
+    }
+    
+    public Product toDomain(ProductJpaEntity entity) {
+        Product product = new Product();
+        product.setId(entity.getId());
+        product.setNombre(entity.getNombre());
+        product.setCategoria(categoryMapper.toDomain(entity.getCategoria()));
+        product.setPrecioUnitario(entity.getPrecioUnitario());
+        return product;
+    }
+}
+```
+**🎯 Función**: Convierte entre entidades de Dominio y entidades JPA.
+
+#### 🔌 **Adaptadores de Persistencia** (`infrastructure/adapter/out/persistence/`)
+
+#### 🛍️ **ProductPersistenceAdapter.java**
+```java
+@Component
+public class ProductPersistenceAdapter implements ProductRepositoryPort {
+    
+    private final ProductJpaRepository jpaRepository;
+    private final ProductPersistenceMapper mapper;
+    
+    @Override
+    public List<Product> findAll() {
+        List<ProductJpaEntity> entities = jpaRepository.findAll();
+        return entities.stream()
+            .map(mapper::toDomain)
+            .collect(Collectors.toList());
+    }
+    
+    @Override
+    public Product save(Product product) {
+        ProductJpaEntity entity = mapper.toEntity(product);
+        ProductJpaEntity savedEntity = jpaRepository.save(entity);
+        return mapper.toDomain(savedEntity);
+    }
+}
+```
+**🎯 Función**: Implementa los puertos de salida del dominio usando JPA.
+
+### ⚙️ **Configuración** (`infrastructure/config/`)
+
+#### 🔧 **BeanConfiguration.java**
+```java
+@Configuration
+public class BeanConfiguration {
+    
+    @Bean
+    public ProductUseCase productUseCase(ProductRepositoryPort productRepository, 
+                                       CategoryRepositoryPort categoryRepository) {
+        return new ProductApplicationService(productRepository, categoryRepository);
+    }
+    
+    @Bean
+    public CategoryUseCase categoryUseCase(CategoryRepositoryPort categoryRepository) {
+        return new CategoryApplicationService(categoryRepository);
+    }
+}
+```
+**🎯 Función**: Configura la inyección de dependencias, conecta puertos con adaptadores.
+
+---
+
+## 🔄 FLUJO DE DATOS COMPLETO
+
+### 📊 **Flujo de Creación de Producto**
+
+```
+1. 📱 REQUEST HTTP POST /productos
+   ↓
+2. 🎮 ProductController.createProduct()
+   ↓
+3. 📋 ProductDTO → Product (ProductWebMapper)
+   ↓
+4. 🟢 ProductApplicationService.createProduct()
+   ├── Validar producto
+   ├── Validar categoría
+   └── Llamar a puerto de salida
+   ↓
+5. 🔌 ProductPersistenceAdapter.save()
+   ↓
+6. 🔄 Product → ProductJpaEntity (PersistenceMapper)
+   ↓
+7. 📚 ProductJpaRepository.save()
+   ↓
+8. 🗃️ Base de Datos MySQL
+   ↓
+9. 🔄 ProductJpaEntity → Product (PersistenceMapper)
+   ↓
+10. 🔄 Product → ProductDTO (WebMapper)
+    ↓
+11. 📱 RESPONSE HTTP JSON
+```
+
+---
+
+## 🎯 SEPARACIÓN DE RESPONSABILIDADES
+
+### 🟡 **DOMAIN** - ¿QUÉ hace el sistema?
+- **📊 Modelos**: Entidades de negocio puras
+- **📥 Puertos IN**: Casos de uso que el sistema puede realizar
+- **📤 Puertos OUT**: Contratos para obtener/guardar datos
+- **🚫 NO depende**: De frameworks, bases de datos, tecnologías
+
+### 🟢 **APPLICATION** - ¿CÓMO orquesta el sistema?
+- **🎯 Use Cases**: Implementan los casos de uso del dominio
+- **🔄 Orquestación**: Coordina validaciones y persistencia
+- **📋 Lógica de Aplicación**: Flujos de trabajo, transacciones
+- **🔗 Depende**: Solo del dominio (puertos)
+
+### 🔵 **INFRASTRUCTURE** - ¿CON QUÉ tecnologías?
+- **📥 Adaptadores IN**: REST API, controladores, DTOs
+- **📤 Adaptadores OUT**: JPA, bases de datos, mappers
+- **⚙️ Configuración**: Spring, beans, propiedades
+- **🔗 Depende**: De frameworks y tecnologías externas
+
+---
+
+## 🚀 ENDPOINTS DISPONIBLES
+
+### 📂 **Categorías** (`/categorias`)
+```
+GET    /categorias              → Listar todas las categorías
+GET    /categorias/{id}         → Obtener categoría por ID
+POST   /categorias              → Crear nueva categoría
+PUT    /categorias/{id}         → Actualizar categoría
+DELETE /categorias/{id}         → Eliminar categoría
+```
+
+### 🛍️ **Productos** (`/productos`)
+```
+GET    /productos                        → Listar todos los productos
+GET    /productos/{id}                   → Obtener producto por ID
+GET    /productos/categoria/{nombre}     → Productos por categoría
+GET    /productos/buscar?term=X          → Buscar por nombre
+GET    /productos/ordenados              → Productos ordenados A-Z
+GET    /productos/rango?min=X&max=Y      → Productos por rango de precio
+POST   /productos                        → Crear nuevo producto
+PUT    /productos/{id}                   → Actualizar producto
+DELETE /productos/{id}                   → Eliminar producto
+```
+
+### 👤 **Clientes** (`/usuarios`)
+```
+GET    /usuarios                → Listar todos los clientes
+GET    /usuarios/{id}           → Obtener cliente por ID
+GET    /usuarios/buscar?nombre=X → Buscar por nombre
+GET    /usuarios/ordenados      → Clientes ordenados A-Z
+POST   /usuarios               → Crear nuevo cliente
+PUT    /usuarios/{id}          → Actualizar cliente
+DELETE /usuarios/{id}          → Eliminar cliente
+```
+
+---
+
+## 🗃️ MODELO DE BASE DE DATOS
+
+### 📊 **Tablas Principales**
+
+#### 🗂️ **categorias**
+```sql
+categoria_id BIGINT PRIMARY KEY AUTO_INCREMENT
+nombre VARCHAR(255) NOT NULL
+```
+
+#### 🛍️ **productos**
+```sql
+producto_id BIGINT PRIMARY KEY AUTO_INCREMENT
+nombre VARCHAR(255) NOT NULL
+descripcion VARCHAR(255)
+marca VARCHAR(255)
+precio_unitario DECIMAL(12,2)
+stock INTEGER
+categoria_id BIGINT (FK → categorias)
+```
+
+#### 👤 **clientes**
+```sql
+cliente_id BIGINT PRIMARY KEY AUTO_INCREMENT
+nombre VARCHAR(255) NOT NULL
+email VARCHAR(255)
+telefono VARCHAR(255)
+ciudad VARCHAR(255)
+pais VARCHAR(255)
+```
+
+#### 📋 **pedidos**
+```sql
+pedido_id BIGINT PRIMARY KEY AUTO_INCREMENT
+fecha DATETIME
+total DECIMAL(38,2)
+cliente_id BIGINT (FK → clientes)
+```
+
+#### 🛒 **carritos**
+```sql
+carrito_id BIGINT PRIMARY KEY AUTO_INCREMENT
+estado VARCHAR(255)
+fecha_creacion DATETIME
+cliente_id BIGINT (FK → clientes)
+```
+
+---
+
+## 🎯 BENEFICIOS DE LA ARQUITECTURA HEXAGONAL
+
+### ✅ **Testabilidad**
+- **🧪 Unit Tests**: Dominio testeable sin dependencias
+- **🔧 Integration Tests**: Adaptadores testeables por separado
+- **🎭 Mocks**: Fácil inyección de dependencias ficticias
+
+### 🔄 **Flexibilidad**
+- **🔌 Intercambio de Adaptadores**: MySQL ↔ PostgreSQL sin tocar dominio
+- **📱 Múltiples Interfaces**: REST, GraphQL, gRPC
+- **🧩 Evolución Independiente**: Cada capa evoluciona por separado
+
+### 🧹 **Mantenibilidad**
+- **📦 Separación Clara**: Cada capa con responsabilidad específica
+- **🔍 Fácil Debugging**: Flujo predecible entre capas
+- **📖 Código Legible**: Estructura estándar y predecible
+
+### 🏗️ **Escalabilidad**
+- **⚡ Performance**: Optimizaciones por capa
+- **🔀 Microservicios**: Preparado para división
+- **📈 Crecimiento**: Agregado de funcionalidades sin refactoring
+
+---
+
+## 🛠️ COMANDOS DE DESARROLLO
+
+### 🔨 **Build y Compilación**
+```bash
+# Compilar proyecto
+./gradlew build
+
+# Compilar sin tests
+./gradlew build -x test
+
+# Limpiar proyecto
+./gradlew clean
+```
+
+### 🧪 **Testing**
+```bash
+# Ejecutar todos los tests
+./gradlew test
+
+# Tests con reporte
+./gradlew test --info
+```
+
+### 🚀 **Ejecución**
+```bash
+# Iniciar aplicación
+./gradlew bootRun
+
+# Ejecutar en background
+./gradlew bootRun &
+```
+
+### 🌐 **Pruebas de API**
+```powershell
+# Listar categorías
+Invoke-RestMethod -Uri "http://localhost:8080/categorias" -Method Get
+
+# Crear categoría
+Invoke-RestMethod -Uri "http://localhost:8080/categorias" -Method Post -ContentType "application/json" -Body '{"nombre":"Nueva Categoria"}'
+
+# Crear producto
+Invoke-RestMethod -Uri "http://localhost:8080/productos" -Method Post -ContentType "application/json" -Body '{"nombre":"Nuevo Producto","categoriaId":1,"precioUnitario":50.0,"stock":100}'
+```
+
+---
+
+## 📈 MÉTRICAS DEL PROYECTO
+
+### 📊 **Estadísticas de Código**
+- **🟡 Domain**: 5 modelos + 10 puertos = 15 clases
+- **🟢 Application**: 5 servicios de aplicación = 5 clases
+- **🔵 Infrastructure**: 20+ adaptadores + mappers + configs
+- **📝 Total**: ~40 clases organizadas en arquitectura hexagonal
+
+### 🎯 **Cobertura Funcional**
+- ✅ **CRUD Completo**: Para todas las entidades
+- ✅ **Validaciones**: Reglas de negocio implementadas
+- ✅ **Búsquedas**: Por múltiples criterios
+- ✅ **Relaciones**: Entre entidades correctamente mapeadas
+
+---
+
+## 🏆 CONCLUSIÓN
+
+El proyecto **Arka Valenzuela** implementa exitosamente la **Arquitectura Hexagonal**, logrando:
+
+1. **🎯 Separación Clara**: Dominio independiente de tecnologías
+2. **🔄 Flexibilidad**: Fácil intercambio de adaptadores
+3. **🧪 Testabilidad**: Cada capa testeable independientemente
+4. **📈 Escalabilidad**: Preparado para crecimiento futuro
+5. **🧹 Mantenibilidad**: Código limpio y organizado
+
+### 🚀 **Listo para**:
+- ✅ Desarrollo continuo
+- ✅ Testing exhaustivo  
+- ✅ Despliegue en producción
+- ✅ Evolución arquitectónica
+
+---
+
+*Documentación actualizada el 15 de Julio de 2025*  
+*Proyecto: Arka Valenzuela - Arquitectura Hexagonal Completa*
     private Integer stock;
 }
 ```
