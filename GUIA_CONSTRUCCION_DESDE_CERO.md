@@ -47,8 +47,8 @@ git --version
 ```sql
 -- Crear base de datos
 CREATE DATABASE arkabd;
-CREATE USER 'jvalenzuela'@'localhost' IDENTIFIED BY 'Koke1988*';
-GRANT ALL PRIVILEGES ON arkabd.* TO 'jvalenzuela'@'localhost';
+CREATE USER 'arkauser'@'localhost' IDENTIFIED BY 'Clave2025*';
+GRANT ALL PRIVILEGES ON arkabd.* TO 'arkauser'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
