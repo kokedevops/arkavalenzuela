@@ -265,11 +265,5 @@ Después de verificar que la migración funciona correctamente, puedes eliminar:
 - `gradle.properties` - Propiedades de optimización de Gradle
 - `gradle/wrapper/` - Gradle Wrapper para consistencia de versiones
 
-### Siguientes Pasos
-1. ✅ Verificar que todas las pruebas pasen: `./gradlew test`
-2. ✅ Construir el proyecto: `./gradlew build`
-3. 🔄 Ejecutar la aplicación: `./gradlew bootRun`
-4. 📝 Actualizar la documentación del proyecto
-5. 🚀 Configurar CI/CD para usar Gradle
 
 -
