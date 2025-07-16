@@ -1,0 +1,11 @@
+// Módulo de Dominio - Sin dependencias externas
+// Contiene solo modelos de dominio puros y puertos (interfaces)
+
+dependencies {
+    // Solo las dependencias mínimas para Java
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.assertj:assertj-core'
+}
+
+// Este módulo NO debe tener dependencias hacia Spring o JPA
+// Mantiene la pureza del dominio según Arquitectura Hexagonal

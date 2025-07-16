@@ -1,0 +1,14 @@
+// Módulo de Aplicación - Casos de uso y servicios de aplicación
+// Depende solo del dominio
+
+dependencies {
+    implementation project(':arkaj-domain')
+    
+    // Spring para inyección de dependencias en servicios de aplicación
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework:spring-tx'
+    
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.springframework:spring-test'
+    testImplementation 'org.mockito:mockito-core'
+}

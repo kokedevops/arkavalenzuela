@@ -1,0 +1,28 @@
+// Módulo Web Principal - Punto de entrada de la aplicación
+// Contiene controladores REST y configuración de Spring Boot
+
+plugins {
+    id 'org.springframework.boot'
+    id 'war'
+}
+
+dependencies {
+    implementation project(':arkaj-domain')
+    implementation project(':arkaj-application')
+    implementation project(':arkaj-infrastructure')
+    
+    // Spring Boot Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    
+    // Tomcat para WAR deployment
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    
+    // Base de datos (heredada de infrastructure pero necesaria para runtime)
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    testRuntimeOnly 'com.h2database:h2'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
