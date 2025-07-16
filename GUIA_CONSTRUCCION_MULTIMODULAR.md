@@ -1169,17 +1169,4 @@ curl -X GET "http://localhost:8080/api/productos/buscar?term=producto"
 
 ---
 
-## 🚀 Próximos Pasos
-
-1. **Agregar más entidades**: Customer, Order, Cart, etc.
-2. **Implementar seguridad**: Spring Security, JWT
-3. **Agregar documentación**: OpenAPI/Swagger
-4. **Implementar cache**: Redis, EhCache
-5. **Agregar mensajería**: RabbitMQ, Apache Kafka
-6. **Implementar CI/CD**: Jenkins, GitHub Actions
-7. **Dockerizar**: Docker, Docker Compose
-8. **Monitoreo**: Actuator, Micrometer, Prometheus
-
----
-
-¡Con esta guía tienes todo lo necesario para construir un proyecto Spring Boot robusto con arquitectura multimodular y principios de Clean Architecture! 🎉
+¡Con esta guía tienes todo lo necesario para construir un proyecto Spring Boot robusto con arquitectura multimodular y principios de Clean Architecture!
