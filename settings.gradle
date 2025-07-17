@@ -1,1 +1,5 @@
 rootProject.name = 'arkajvalenzuela'
+
+// Módulos del proyecto
+include 'arca-cotizador'
+include 'arca-gestor-solicitudes'
