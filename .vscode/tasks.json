@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Compilar y Ejecutar Microservicios Arca",
+			"type": "shell",
+			"command": "./gradlew clean build bootRun",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [
+				"$gradle"
+			]
+		}
+	]
+}
