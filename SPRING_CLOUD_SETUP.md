@@ -41,13 +41,7 @@ Este proyecto ha sido migrado para utilizar Spring Cloud con las siguientes cara
 
 ## Instrucciones de Inicio
 
-### Opción 1: Script Automático (Recomendado)
-```bash
-# Ejecutar desde la raíz del proyecto
-./scripts/start-spring-cloud.bat
-```
-
-### Opción 2: Inicio Manual Secuencial
+### Opción 1: Inicio Manual Secuencial
 ```bash
 # 1. Iniciar Eureka Server
 ./gradlew :eureka-server:bootRun
