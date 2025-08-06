@@ -46,7 +46,7 @@ Este proyecto ha sido migrado para utilizar Spring Cloud con las siguientes cara
 # 1. Iniciar Eureka Server
 ./gradlew :eureka-server:bootRun
 
-# 2. Esperar 30 segundos, luego iniciar API Gateway
+# 2. Esperar 30 segundos o mas hasta que inicie Eureka, luego iniciar API Gateway
 ./gradlew :api-gateway:bootRun
 
 # 3. Iniciar servicios principales
@@ -59,7 +59,7 @@ Este proyecto ha sido migrado para utilizar Spring Cloud con las siguientes cara
 ./gradlew :arca-gestor-solicitudes:bootRun --args="--server.port=8092 --eureka.instance.instance-id=arca-gestor-solicitudes:8092"
 ```
 
-### Opción 3: Usando VS Code Tasks
+### Opción 2: Usando VS Code Tasks
 1. Abrir VS Code en la raíz del proyecto
 2. Ejecutar el task "Build All Modules" para compilar todo
 3. Ejecutar cada servicio individualmente usando los tasks correspondientes
