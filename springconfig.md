@@ -650,3 +650,27 @@ vault server -dev
 5. **Testear**: `./scripts/test-config-endpoints.bat`
 
 Este proyecto independiente te permitirá gestionar todas las configuraciones de manera centralizada y segura! 🎉
+
+
+ Solución paso a paso para Windows
+1. Descargar Vault
+Ve a la página oficial de Vault:
+👉 https://developer.hashicorp.com/vault/downloads
+
+Descarga la versión de Windows adecuada para tu arquitectura (amd64 usualmente).
+
+2. Extraer y mover Vault
+Extrae el .zip descargado.
+
+Mueve el ejecutable vault.exe a una carpeta, por ejemplo:
+C:\Program Files\Vault\ o C:\HashiCorp\Vault\
+
+3. Agregar la ruta al PATH
+Abre el menú inicio → escribe variables de entorno → clic en "Editar las variables de entorno del sistema".
+
+En la ventana que se abre, clic en "Variables de entorno..."
+
+En "Variables del sistema", busca Path y haz clic en "Editar..."
+
+Agrega la ruta donde pusiste vault.exe, por ejemplo:
+C:\Program Files\Vault\
