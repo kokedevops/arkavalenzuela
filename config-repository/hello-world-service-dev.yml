@@ -1,0 +1,40 @@
+# Configuración para Hello World Service - Entorno Development
+server:
+  port: 8083
+
+spring:
+  application:
+    name: hello-world-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh,env,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.arka.hello: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Configuración específica del hello world service
+hello:
+  message: "¡Hola desde Config Server!"
+  version: "1.0.0"
+  features:
+    greeting: true
+    timestamp: true
