@@ -1,0 +1,48 @@
+# Configuración compartida para todos los microservicios
+# Este archivo contiene configuraciones comunes que aplican a todos los servicios
+
+# Configuración de Eureka común
+eureka:
+  client:
+    healthcheck:
+      enabled: true
+    lease:
+      duration: 30
+    registry-fetch-interval: 30
+  instance:
+    lease-renewal-interval: 30
+    lease-expiration-duration: 90
+
+# Configuración de management común
+management:
+  endpoint:
+    health:
+      show-details: always
+    refresh:
+      enabled: true
+  endpoints:
+    web:
+      base-path: /actuator
+      cors:
+        allowed-origins: "*"
+        allowed-methods: GET,POST
+
+# Configuración de logging común
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+  level:
+    org.springframework.cloud: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+
+# Configuración de Spring común
+spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: America/Bogota
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update

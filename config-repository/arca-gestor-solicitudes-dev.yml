@@ -1,0 +1,58 @@
+# Configuración para Arca Gestor Solicitudes - Entorno Development
+server:
+  port: 8082
+
+spring:
+  application:
+    name: arca-gestor-solicitudes
+  webflux:
+    base-path: /
+    webclient:
+      max-in-memory-size: 1MB
+  r2dbc:
+    url: r2dbc:h2:mem:///gestor_db?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+  h2:
+    console:
+      enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh,env,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.arka.gestorsolicitudes: DEBUG
+    reactor.netty: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Configuración específica del gestor de solicitudes
+gestor:
+  max-requests-per-hour: 100
+  notification:
+    enabled: true
+    email:
+      enabled: true
+    sms:
+      enabled: false
+  workflow:
+    auto-approval:
+      enabled: false
+      max-amount: 50000
