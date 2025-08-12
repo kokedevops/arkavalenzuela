@@ -13,6 +13,32 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
     
+    // Circuit Breaker dependencies
+    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+    implementation 'io.github.resilience4j:resilience4j-reactor:2.2.0'
+    
+    // CLI dependencies  
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+    
+    // Spring Cloud Kubernetes dependencies (requires separate BOM - commented out for build)
+    // implementation 'org.springframework.cloud:spring-cloud-kubernetes-discovery'
+    // implementation 'org.springframework.cloud:spring-cloud-kubernetes-config'
+    // Note: Kubernetes manifests are still available in k8s/ directory
+    
+    // Spring Cloud Contract dependencies
+    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
+    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
+    
+    // Spring Cloud Stream dependencies
+    implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit'
+    implementation 'org.springframework.cloud:spring-cloud-stream-binder-rabbit'
+    
+    // Spring Cloud AWS dependencies (commented for testing)
+    // implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.0.4'
+    // implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.0.4'
+    
     // R2DBC drivers
     runtimeOnly 'io.r2dbc:r2dbc-h2'
     runtimeOnly 'com.h2database:h2'
