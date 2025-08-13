@@ -25,7 +25,7 @@ public interface UsuarioRepository extends R2dbcRepository<Usuario, Long> {
     /**
      * Busca un usuario por username o email
      */
-    @Query("SELECT * FROM usuarios WHERE username = :identifier OR email = :identifier AND activo = true")
+    @Query("SELECT * FROM usuarios WHERE (username = :identifier OR email = :identifier) AND activo = true")
     Mono<Usuario> findByUsernameOrEmail(String identifier);
     
     /**

@@ -1,0 +1,47 @@
+# Configuración para Kubernetes
+spring:
+  cloud:
+    kubernetes:
+      enabled: true
+      config:
+        enabled: true
+        name: arca-gestor-solicitudes-config
+        namespace: arka-namespace
+        sources:
+          - name: arca-gestor-solicitudes-config
+            namespace: arka-namespace
+      discovery:
+        enabled: true
+        all-namespaces: false
+        namespace: arka-namespace
+        service-labels:
+          app: arca-gestor-solicitudes
+          version: v1
+      secrets:
+        enabled: true
+        name: arca-gestor-solicitudes-secrets
+        namespace: arka-namespace
+      reload:
+        enabled: true
+        mode: event
+        strategy: refresh
+
+# Configuración específica para Kubernetes
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh,env,kubernetes
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    kubernetes:
+      enabled: true
+
+# Logging para Kubernetes
+logging:
+  level:
+    org.springframework.cloud.kubernetes: DEBUG
+    io.fabric8.kubernetes: INFO

@@ -16,7 +16,7 @@ public class CircuitBreakerMonitorController {
     /**
      * Endpoint básico para verificar el estado del sistema de Circuit Breaker
      */
-    @GetMapping("/estado")
+    @GetMapping("/estado-basico")
     public Mono<ResponseEntity<Map<String, Object>>> obtenerEstado() {
         Map<String, Object> estado = Map.of(
             "circuitBreakerEnabled", true,

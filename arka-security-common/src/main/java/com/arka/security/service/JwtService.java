@@ -76,11 +76,11 @@ public class JwtService {
      * Extrae todos los claims del token
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
     
     /**
@@ -128,11 +128,11 @@ public class JwtService {
         LocalDateTime expirationTime = now.plusSeconds(expiration);
         
         return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(username)
-                .setIssuedAt(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()))
-                .setExpiration(Date.from(expirationTime.atZone(ZoneId.systemDefault()).toInstant()))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .claims(extraClaims)
+                .subject(username)
+                .issuedAt(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()))
+                .expiration(Date.from(expirationTime.atZone(ZoneId.systemDefault()).toInstant()))
+                .signWith(getSigningKey())
                 .compact();
     }
     
