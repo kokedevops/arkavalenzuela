@@ -10,6 +10,9 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
     
+    // Módulo de seguridad común
+    implementation project(':arka-security-common')
+    
     // R2DBC drivers (ejemplo con H2 para desarrollo)
     runtimeOnly 'io.r2dbc:r2dbc-h2'
     runtimeOnly 'com.h2database:h2'
@@ -17,6 +20,7 @@ dependencies {
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 jar {

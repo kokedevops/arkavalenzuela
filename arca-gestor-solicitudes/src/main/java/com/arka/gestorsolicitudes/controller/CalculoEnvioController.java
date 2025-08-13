@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -15,9 +16,11 @@ import java.util.Map;
 
 /**
  * Controlador REST para el cálculo de envíos con Circuit Breaker
+ * Aplicando seguridad basada en roles
  */
 @RestController
-@RequestMapping("/api/calculo-envio")
+@RequestMapping("/api/calculos")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class CalculoEnvioController {
     
     private static final Logger logger = LoggerFactory.getLogger(CalculoEnvioController.class);
@@ -31,11 +34,16 @@ public class CalculoEnvioController {
     }
     
     /**
-     * Endpoint principal para calcular envío
+     * Endpoint principal para calcular envío - Todos los roles autenticados
      */
-    @PostMapping("/calcular")
-    public Mono<ResponseEntity<CalculoEnvio>> calcularEnvio(@RequestBody Map<String, Object> request) {
-        logger.info("Recibida solicitud de cálculo de envío: {}", request);
+    @PostMapping("/envio")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'GESTOR', 'OPERADOR', 'USUARIO')")
+    public Mono<ResponseEntity<CalculoEnvio>> calcularEnvio(
+            @RequestBody Map<String, Object> request,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username) {
+        
+        logger.info("Usuario {} (ID: {}) solicita cálculo de envío: {}", username, userId, request);
         
         String origen = (String) request.get("origen");
         String destino = (String) request.get("destino");

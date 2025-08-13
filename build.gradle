@@ -37,7 +37,18 @@ subprojects {
 		implementation 'org.springframework.boot:spring-boot-starter'
 		implementation 'org.springframework.cloud:spring-cloud-starter-config'
 		implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+		
+		// Spring Security dependencies para todos los módulos
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+		implementation 'org.springframework.security:spring-security-oauth2-resource-server'
+		implementation 'org.springframework.security:spring-security-oauth2-jose'
+		implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+		implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+		implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+		implementation 'org.springframework.security:spring-security-crypto'
+		
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testImplementation 'org.springframework.security:spring-security-test'
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	}
 	
