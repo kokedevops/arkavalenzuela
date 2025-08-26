@@ -1,0 +1,66 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Eureka Server
+  - job_name: 'eureka-server'
+    static_configs:
+      - targets: ['eureka-server:8761']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+
+  # Gestor Solicitudes
+  - job_name: 'gestor-solicitudes'
+    static_configs:
+      - targets: ['gestor-solicitudes:8082']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+
+  # Cotizador
+  - job_name: 'cotizador'
+    static_configs:
+      - targets: ['cotizador:8083']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+
+  # Hello World Service
+  - job_name: 'hello-world-service'
+    static_configs:
+      - targets: ['hello-world-service:8084']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+
+  # RabbitMQ
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15692']
+    scrape_interval: 30s
+
+  # PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:9187']
+    scrape_interval: 30s
+
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:9121']
+    scrape_interval: 30s
