@@ -288,6 +288,59 @@ services:
 # Networks
 # =================================
 
+  # =================================
+  # MongoDB & Email Services
+  # =================================
+  
+  # 🍃 MongoDB for Notifications
+  mongodb:
+    image: mongo:7.0
+    container_name: arka-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: arka_admin
+      MONGO_INITDB_ROOT_PASSWORD: Arca2025*
+      MONGO_INITDB_DATABASE: arka_notifications
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - arka-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 🗃️ MongoDB Express (Web UI)
+  mongo-express:
+    image: mongo-express:1.0.0
+    container_name: arka-mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: arka_admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: Arca2025*
+      ME_CONFIG_MONGODB_URL: mongodb://arka_admin:Arca2025*@mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongodb
+    networks:
+      - arka-network
+
+  # 📧 MailHog for Email Testing
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: arka-mailhog
+    restart: always
+    ports:
+      - "1025:1025"  # SMTP port
+      - "8025:8025"  # Web UI port
+    networks:
+      - arka-network
+
 networks:
   arka-network:
     driver: bridge
@@ -311,4 +364,6 @@ volumes:
   postgres-data:
     driver: local
   redis-data:
+    driver: local
+  mongodb_data:
     driver: local
