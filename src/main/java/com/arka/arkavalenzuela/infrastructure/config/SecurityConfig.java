@@ -25,11 +25,13 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Deshabilitamos CSRF para APIs REST
             .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/", "/error").permitAll() // Página de inicio y errores públicos
+                .requestMatchers("/health", "/actuator/**").permitAll() // Health checks
+                .requestMatchers("/api", "/api/info").permitAll() // Información de la API
                 .requestMatchers("/api/auth/**").permitAll() // Endpoints de autenticación públicos
                 .requestMatchers("/api/public/**").permitAll() // Endpoints públicos
                 .requestMatchers("/api/products/**").permitAll() // Catálogo de productos público
                 .requestMatchers("/api/categories/**").permitAll() // Categorías públicas
-                .requestMatchers("/health", "/actuator/**").permitAll() // Health checks
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
                 .anyRequest().authenticated() // Todo lo demás requiere autenticación
             )
