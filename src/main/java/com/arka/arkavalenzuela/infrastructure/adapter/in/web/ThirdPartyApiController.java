@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
 
 /**
  * 🌐 API de Terceros - Servicio de Datos CRUD
@@ -152,7 +153,7 @@ public class ThirdPartyApiController {
                             .body(createErrorResponse("Tabla no válida. Tablas disponibles: productos, usuarios, pedidos, carritos, categorias"));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound()
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Registro no encontrado con ID: " + id + " en tabla: " + tabla));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -252,7 +253,7 @@ public class ThirdPartyApiController {
                             .body(createErrorResponse("Tabla no válida para eliminación. Tablas disponibles: productos, usuarios, pedidos, carritos, categorias"));
             }
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound()
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Registro no encontrado con ID: " + id + " en tabla: " + tabla));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -310,7 +311,14 @@ public class ThirdPartyApiController {
         ProductDto dto = new ProductDto();
         if (data.containsKey("nombre")) dto.setNombre((String) data.get("nombre"));
         if (data.containsKey("descripcion")) dto.setDescripcion((String) data.get("descripcion"));
-        if (data.containsKey("precio")) dto.setPrecio(((Number) data.get("precio")).doubleValue());
+        if (data.containsKey("precio")) {
+            BigDecimal precio = BigDecimal.valueOf(((Number) data.get("precio")).doubleValue());
+            dto.setPrecioUnitario(precio);
+        }
+        if (data.containsKey("precioUnitario")) {
+            BigDecimal precio = BigDecimal.valueOf(((Number) data.get("precioUnitario")).doubleValue());
+            dto.setPrecioUnitario(precio);
+        }
         if (data.containsKey("stock")) dto.setStock(((Number) data.get("stock")).intValue());
         return dto;
     }
@@ -325,7 +333,10 @@ public class ThirdPartyApiController {
 
     private OrderDto mapToOrderDto(Map<String, Object> data) {
         OrderDto dto = new OrderDto();
-        if (data.containsKey("total")) dto.setTotal(((Number) data.get("total")).doubleValue());
+        if (data.containsKey("total")) {
+            BigDecimal total = BigDecimal.valueOf(((Number) data.get("total")).doubleValue());
+            dto.setTotal(total);
+        }
         if (data.containsKey("estado")) dto.setEstado((String) data.get("estado"));
         return dto;
     }
@@ -339,7 +350,7 @@ public class ThirdPartyApiController {
     private CategoryDto mapToCategoryDto(Map<String, Object> data) {
         CategoryDto dto = new CategoryDto();
         if (data.containsKey("nombre")) dto.setNombre((String) data.get("nombre"));
-        if (data.containsKey("descripcion")) dto.setDescripcion((String) data.get("descripcion"));
+        // CategoryDto solo tiene campo 'nombre', no 'descripcion'
         return dto;
     }
 }
