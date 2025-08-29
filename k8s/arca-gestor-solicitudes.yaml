@@ -1,0 +1,187 @@
+# Arca Gestor Solicitudes ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: arca-gestor-solicitudes-config
+  namespace: arka-ecommerce
+data:
+  application.yml: |
+    server:
+      port: 8082
+    
+    spring:
+      application:
+        name: arca-gestor-solicitudes
+      cloud:
+        config:
+          uri: http://config-server-service:8888
+          fail-fast: false
+          retry:
+            max-attempts: 20
+            initial-interval: 3000
+      datasource:
+        url: jdbc:mysql://mysql-service:3306/arkagestorsolicitudes?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+        username: arkauser
+        password: ${DB_PASSWORD}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+      jpa:
+        hibernate:
+          ddl-auto: update
+        show-sql: false
+        database-platform: org.hibernate.dialect.MySQL8Dialect
+      data:
+        mongodb:
+          uri: mongodb://arkauser:ArkaPass2025@mongodb-service:27017/arkaanalytics
+    
+    eureka:
+      client:
+        service-url:
+          defaultZone: http://eureka-service:8761/eureka/
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        prefer-ip-address: true
+        hostname: arca-gestor-solicitudes
+    
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+      endpoint:
+        health:
+          show-details: always
+    
+    resilience4j:
+      circuitbreaker:
+        instances:
+          default:
+            register-health-indicator: true
+            sliding-window-size: 10
+            minimum-number-of-calls: 5
+            wait-duration-in-open-state: 30s
+            failure-rate-threshold: 50
+    
+    logging:
+      level:
+        com.arka.gestorsolicitudes: DEBUG
+---
+# Arca Gestor Solicitudes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arca-gestor-solicitudes
+  namespace: arka-ecommerce
+  labels:
+    app: arca-gestor-solicitudes
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: arca-gestor-solicitudes
+  template:
+    metadata:
+      labels:
+        app: arca-gestor-solicitudes
+        tier: backend
+    spec:
+      containers:
+      - name: arca-gestor-solicitudes
+        image: arka/arca-gestor-solicitudes:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8082
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: "http://config-server-service:8888"
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ecommerce-secrets
+              key: db-password
+        volumeMounts:
+        - name: gestor-config-volume
+          mountPath: /app/config
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8082
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+      volumes:
+      - name: gestor-config-volume
+        configMap:
+          name: arca-gestor-solicitudes-config
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for MySQL to be ready..."
+            until nc -z mysql-service 3306; do
+              echo "MySQL not ready, waiting..."
+              sleep 10
+            done
+            echo "MySQL is ready!"
+      - name: wait-for-mongodb
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for MongoDB to be ready..."
+            until nc -z mongodb-service 27017; do
+              echo "MongoDB not ready, waiting..."
+              sleep 10
+            done
+            echo "MongoDB is ready!"
+      - name: wait-for-eureka
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for Eureka to be ready..."
+            until nc -z eureka-service 8761; do
+              echo "Eureka not ready, waiting..."
+              sleep 10
+            done
+            echo "Eureka is ready!"
+---
+# Arca Gestor Solicitudes Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: arca-gestor-solicitudes-service
+  namespace: arka-ecommerce
+  labels:
+    app: arca-gestor-solicitudes
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8082
+    targetPort: 8082
+    protocol: TCP
+    name: http
+  selector:
+    app: arca-gestor-solicitudes

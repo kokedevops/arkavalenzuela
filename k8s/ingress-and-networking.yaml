@@ -1,0 +1,246 @@
+# Ingress Controller para ARKA E-commerce
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: arka-ecommerce-ingress
+  namespace: arka-ecommerce
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+spec:
+  tls:
+  - hosts:
+    - arka.local
+    - api.arka.local
+    - eureka.arka.local
+    - monitoring.arka.local
+    secretName: arka-tls-secret
+  rules:
+  # Main API Gateway
+  - host: arka.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway-service
+            port:
+              number: 8080
+  
+  # API Gateway (subdomain)
+  - host: api.arka.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway-service
+            port:
+              number: 8080
+  
+  # Eureka Dashboard
+  - host: eureka.arka.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eureka-service
+            port:
+              number: 8761
+  
+  # Monitoring (Grafana)
+  - host: monitoring.arka.local
+    http:
+      paths:
+      - path: /grafana
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana-service
+            port:
+              number: 3000
+      - path: /prometheus
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus-service
+            port:
+              number: 9090
+---
+# TLS Certificate for HTTPS
+apiVersion: v1
+kind: Secret
+metadata:
+  name: arka-tls-secret
+  namespace: arka-ecommerce
+type: kubernetes.io/tls
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t  # Placeholder certificate
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t  # Placeholder private key
+---
+# Network Policy para Security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: arka-ecommerce-network-policy
+  namespace: arka-ecommerce
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow traffic from API Gateway to all services
+  - from:
+    - podSelector:
+        matchLabels:
+          app: api-gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+  # Allow traffic from monitoring namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: arka-monitoring
+  # Allow traffic within the same namespace
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: arka-ecommerce
+  egress:
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow outbound HTTPS
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow communication with databases
+  - to:
+    - podSelector:
+        matchLabels:
+          tier: database
+    ports:
+    - protocol: TCP
+      port: 3306
+    - protocol: TCP
+      port: 27017
+    - protocol: TCP
+      port: 6379
+  # Allow communication with Eureka
+  - to:
+    - podSelector:
+        matchLabels:
+          app: eureka-server
+    ports:
+    - protocol: TCP
+      port: 8761
+  # Allow communication with Config Server
+  - to:
+    - podSelector:
+        matchLabels:
+          app: config-server
+    ports:
+    - protocol: TCP
+      port: 8888
+---
+# HorizontalPodAutoscaler para API Gateway
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-gateway-hpa
+  namespace: arka-ecommerce
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-gateway
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+# HorizontalPodAutoscaler para E-commerce Core
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ecommerce-core-hpa
+  namespace: arka-ecommerce
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ecommerce-core
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+# PodDisruptionBudget para High Availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-gateway-pdb
+  namespace: arka-ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ecommerce-core-pdb
+  namespace: arka-ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ecommerce-core
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eureka-server-pdb
+  namespace: arka-ecommerce
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: eureka-server

@@ -1,0 +1,158 @@
+# ConfigMap para MySQL
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: arka-ecommerce
+data:
+  my.cnf: |
+    [mysqld]
+    default-storage-engine=innodb
+    innodb_buffer_pool_size=256M
+    innodb_log_file_size=64M
+    max_connections=200
+    bind-address=0.0.0.0
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_unicode_ci
+    
+    # Performance Optimization
+    query_cache_type=1
+    query_cache_size=64M
+    tmp_table_size=64M
+    max_heap_table_size=64M
+    
+    # Binary logging
+    log-bin=mysql-bin
+    binlog_format=row
+    expire_logs_days=7
+---
+# MySQL Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: arka-ecommerce
+type: Opaque
+data:
+  mysql-root-password: QXJrYUBteXNxbDIwMjU=  # ArkaMySQL2025 en base64
+  mysql-user: YXJrYXVzZXI=                   # arkauser en base64
+  mysql-password: QXJrYVBhc3MyMDI1         # ArkaPass2025 en base64
+  mysql-database: YXJrYWVjb21tZXJjZQ==       # arkaecommerce en base64
+---
+# PersistentVolumeClaim para MySQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: arka-ecommerce
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path  # Para k3s local-path provisioner
+  resources:
+    requests:
+      storage: 10Gi
+---
+# MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: arka-ecommerce
+  labels:
+    app: mysql
+    tier: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+        tier: database
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-root-password
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: mysql-database
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+        - name: mysql-config-vol
+          mountPath: /etc/mysql/conf.d
+        livenessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - mysqladmin
+            - ping
+            - -h
+            - localhost
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+      - name: mysql-config-vol
+        configMap:
+          name: mysql-config
+---
+# MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: arka-ecommerce
+  labels:
+    app: mysql
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3306
+    targetPort: 3306
+    protocol: TCP
+  selector:
+    app: mysql

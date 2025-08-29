@@ -1,0 +1,27 @@
+# Namespace para el proyecto ARKA
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arka-ecommerce
+  labels:
+    name: arka-ecommerce
+    project: arka-platform
+    environment: production
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arka-dev
+  labels:
+    name: arka-dev
+    project: arka-platform
+    environment: development
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arka-monitoring
+  labels:
+    name: arka-monitoring
+    project: arka-platform
+    environment: monitoring

@@ -6,7 +6,8 @@
   <img src="https://img.shields.io/badge/Docker-Enabled-blue" alt="Docker"/>
   <img src="https://img.shields.io/badge/Architecture-Hexagonal-orange" alt="Hexagonal"/>
   <img src="https://img.shields.io/badge/Security-JWT-red" alt="JWT"/>
-  <img src="https://img.shields.io/badge/Cloud-AWS%20Ready-yellow" alt="AWS"/>
+  <img src="https://img.shields.io/badge/Cloud-AWS%20%7C%20Kubernetes-yellow" alt="Cloud"/>
+  <img src="https://img.shields.io/badge/Kubernetes-k3s%20%7C%20Rancher-326CE5" alt="Kubernetes"/>
   <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT"/>
 </div>
 
@@ -28,6 +29,13 @@
 | **[📮 Postman Guide](POSTMAN-GUIA-COMPLETA.md)** | Colección completa de Postman | Testing |
 | **[✅ Testing Guide](GUIA-PRUEBAS-COMPLETA.md)** | Tests unitarios e integración | QA |
 
+### ☁️ **Cloud & Orchestration**
+| Documento | Descripción | Uso |
+|-----------|-------------|-----|
+| **[☸️ Kubernetes Guide](k8s/README.md)** | Despliegue completo en Kubernetes | DevOps |
+| **[🎛️ k3s Setup](k8s/K3S-SETUP-GUIDE.md)** | Instalación y configuración k3s | DevOps |
+| **[🤠 Rancher Guide](k8s/RANCHER-SETUP-GUIDE.md)** | Gestión con Rancher | DevOps |
+
 ### 🛠️ **Operaciones**
 | Documento | Descripción | Uso |
 |-----------|-------------|-----|
@@ -45,6 +53,7 @@
 ✅ **Programación Reactiva** - WebFlux con Mono/Flux  
 ✅ **Spring Cloud** - Eureka, Gateway, Config, Circuit Breakers  
 ✅ **Docker** - Containerización completa con Docker Compose  
+✅ **Kubernetes** - Orquestación con k3s y Rancher  
 ✅ **Spring Security + JWT** - Autenticación y autorización robusta  
 ✅ **API de Terceros** - Endpoints CRUD según especificaciones  
 ✅ **Testing** - Pruebas unitarias, integración y API  
@@ -87,6 +96,7 @@
 
 ## 🏗️ **ARQUITECTURA DEL SISTEMA**
 
+### 🎯 **Opción 1: Docker Compose (Desarrollo)**
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Mobile App    │    │     Web App      │    │   Third Party   │
@@ -118,6 +128,57 @@
               │  MySQL + MongoDB + MailHog         │
               └─────────────────────────────────────┘
 ```
+
+### ☸️ **Opción 2: Kubernetes (Producción)**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    KUBERNETES CLUSTER                      │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                 INGRESS LAYER                           ││
+│  │    Traefik/NGINX → *.arka.local → LoadBalancer         ││
+│  └─────────────────────────────────────────────────────────┘│
+│                              │                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                APPLICATION LAYER                        ││
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    ││
+│  │  │ API Gateway │  │Config Server│  │Eureka Server│    ││
+│  │  │   (2 pods)  │  │   (1 pod)   │  │   (1 pod)   │    ││
+│  │  └─────────────┘  └─────────────┘  └─────────────┘    ││
+│  │                                                         ││
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    ││
+│  │  │ E-commerce  │  │    Arca     │  │    Arca     │    ││
+│  │  │    Core     │  │  Cotizador  │  │   Gestor    │    ││
+│  │  │  (2 pods)   │  │  (2 pods)   │  │  (2 pods)   │    ││
+│  │  └─────────────┘  └─────────────┘  └─────────────┘    ││
+│  └─────────────────────────────────────────────────────────┘│
+│                              │                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                  DATA LAYER                             ││
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    ││
+│  │  │MySQL+PVC 10G│  │MongoDB+PVC  │  │Redis+PVC 2G │    ││
+│  │  │   (1 pod)   │  │   10G       │  │   (1 pod)   │    ││
+│  │  └─────────────┘  └─────────────┘  └─────────────┘    ││
+│  └─────────────────────────────────────────────────────────┘│
+│                              │                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │             MONITORING LAYER                            ││
+│  │  ┌─────────────┐  ┌─────────────┐                      ││
+│  │  │Prometheus   │  │  Grafana    │                      ││
+│  │  │+PVC 10G     │  │  +PVC 5G    │                      ││
+│  │  └─────────────┘  └─────────────┘                      ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 🚀 **Opciones de Deployment**
+
+| Método | Ambiente | Complejidad | Escalabilidad | Recomendado para |
+|--------|----------|-------------|---------------|------------------|
+| **🏃 Local** | Desarrollo | ⭐ | ⭐ | Desarrollo inicial |
+| **🐳 Docker Compose** | Desarrollo/Demo | ⭐⭐ | ⭐⭐ | Demos y testing |
+| **☸️ k3s** | Staging/Producción | ⭐⭐⭐ | ⭐⭐⭐⭐ | Producción ligera |
+| **🤠 Rancher** | Producción | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Producción enterprise |
 
 ---
 
@@ -259,6 +320,7 @@ scripts/start-ecommerce-complete.sh
 
 ## 🌐 **URLS DE ACCESO**
 
+### 🏠 **Desarrollo Local**
 | Servicio | URL | Descripción |
 |----------|-----|-------------|
 | **API Gateway** | http://localhost:8080 | Punto de entrada principal |
@@ -268,6 +330,30 @@ scripts/start-ecommerce-complete.sh
 | **Hello World** | http://localhost:8083 | API de prueba |
 | **MailHog UI** | http://localhost:8025 | Interfaz de emails |
 | **MongoDB Express** | http://localhost:8081 | Interfaz MongoDB |
+
+### ☸️ **Kubernetes (k3s/Rancher)**
+| Servicio | URL | Descripción |
+|----------|-----|-------------|
+| **API Gateway** | https://arka.local | Punto de entrada principal |
+| **API Gateway** | https://api.arka.local | API Gateway alternativo |
+| **Eureka Dashboard** | https://eureka.arka.local | Consola de servicios |
+| **Grafana** | https://monitoring.arka.local/grafana | Dashboard de monitoreo |
+| **Prometheus** | https://monitoring.arka.local/prometheus | Métricas del sistema |
+
+### 🔗 **Port Forward (Kubernetes)**
+```bash
+# API Gateway
+kubectl port-forward svc/api-gateway-service 8080:8080 -n arka-ecommerce
+
+# Eureka Dashboard  
+kubectl port-forward svc/eureka-service 8761:8761 -n arka-ecommerce
+
+# Grafana
+kubectl port-forward svc/grafana-service 3000:3000 -n arka-monitoring
+
+# Prometheus
+kubectl port-forward svc/prometheus-service 9090:9090 -n arka-monitoring
+```
 
 ---
 
@@ -469,6 +555,19 @@ docker-compose up -d --build
 ## 🚀 **PRODUCCIÓN**
 
 ### 🏗️ **Deploy con Kubernetes**
+```bash
+# Despliegue completo en k3s/Rancher
+./k8s/deploy-k8s.sh
+
+# Verificar deployment
+kubectl get pods -n arka-ecommerce
+kubectl get services -n arka-ecommerce
+
+# Acceso a servicios
+kubectl port-forward svc/api-gateway-service 8080:8080 -n arka-ecommerce
+```
+
+### 🐳 **Deploy con Docker**
 ```bash
 # Aplicar manifiestos
 kubectl apply -f k8s/

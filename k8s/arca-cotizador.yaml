@@ -1,0 +1,173 @@
+# Arca Cotizador ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: arca-cotizador-config
+  namespace: arka-ecommerce
+data:
+  application.yml: |
+    server:
+      port: 8081
+    
+    spring:
+      application:
+        name: arca-cotizador
+      cloud:
+        config:
+          uri: http://config-server-service:8888
+          fail-fast: false
+          retry:
+            max-attempts: 20
+            initial-interval: 3000
+      datasource:
+        url: jdbc:mysql://mysql-service:3306/arkacotizador?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+        username: arkauser
+        password: ${DB_PASSWORD}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+      jpa:
+        hibernate:
+          ddl-auto: update
+        show-sql: false
+        database-platform: org.hibernate.dialect.MySQL8Dialect
+    
+    eureka:
+      client:
+        service-url:
+          defaultZone: http://eureka-service:8761/eureka/
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        prefer-ip-address: true
+        hostname: arca-cotizador
+    
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+      endpoint:
+        health:
+          show-details: always
+    
+    resilience4j:
+      circuitbreaker:
+        instances:
+          default:
+            register-health-indicator: true
+            sliding-window-size: 10
+            minimum-number-of-calls: 5
+            wait-duration-in-open-state: 30s
+            failure-rate-threshold: 50
+    
+    logging:
+      level:
+        com.arka.cotizador: DEBUG
+---
+# Arca Cotizador Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arca-cotizador
+  namespace: arka-ecommerce
+  labels:
+    app: arca-cotizador
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: arca-cotizador
+  template:
+    metadata:
+      labels:
+        app: arca-cotizador
+        tier: backend
+    spec:
+      containers:
+      - name: arca-cotizador
+        image: arka/arca-cotizador:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: "http://config-server-service:8888"
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ecommerce-secrets
+              key: db-password
+        volumeMounts:
+        - name: cotizador-config-volume
+          mountPath: /app/config
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+      volumes:
+      - name: cotizador-config-volume
+        configMap:
+          name: arca-cotizador-config
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for MySQL to be ready..."
+            until nc -z mysql-service 3306; do
+              echo "MySQL not ready, waiting..."
+              sleep 10
+            done
+            echo "MySQL is ready!"
+      - name: wait-for-eureka
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for Eureka to be ready..."
+            until nc -z eureka-service 8761; do
+              echo "Eureka not ready, waiting..."
+              sleep 10
+            done
+            echo "Eureka is ready!"
+---
+# Arca Cotizador Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: arca-cotizador-service
+  namespace: arka-ecommerce
+  labels:
+    app: arca-cotizador
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+    name: http
+  selector:
+    app: arca-cotizador

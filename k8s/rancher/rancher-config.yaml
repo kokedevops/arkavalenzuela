@@ -1,0 +1,280 @@
+# Rancher Project Configuration
+apiVersion: management.cattle.io/v3
+kind: Project
+metadata:
+  name: arka-ecommerce-project
+  namespace: cattle-global-data
+spec:
+  displayName: "ARKA E-commerce Platform"
+  description: "Microservices e-commerce platform with Spring Boot and Spring Cloud"
+  clusterId: "local"
+  namespaceDefaultResourceQuota:
+    limit:
+      limitsCpu: "2000m"
+      limitsMemory: "4Gi"
+      requestsCpu: "1000m"
+      requestsMemory: "2Gi"
+  resourceQuota:
+    limit:
+      limitsCpu: "10000m"
+      limitsMemory: "20Gi"
+      requestsCpu: "5000m"
+      requestsMemory: "10Gi"
+---
+# Rancher App Template for ARKA
+apiVersion: catalog.cattle.io/v1
+kind: App
+metadata:
+  name: arka-ecommerce
+  namespace: cattle-system
+spec:
+  description: "Complete ARKA E-commerce microservices platform"
+  externalId: "catalog://?catalog=arka&template=ecommerce&version=1.0.0"
+  projectId: "local:p-arka"
+  targetNamespace: "arka-ecommerce"
+  answers:
+    # Database Configuration
+    mysql.enabled: "true"
+    mysql.persistence.size: "10Gi"
+    mysql.auth.rootPassword: "ArkaMySQL2025"
+    mysql.auth.database: "arkaecommerce"
+    mysql.auth.username: "arkauser"
+    mysql.auth.password: "ArkaPass2025"
+    
+    # MongoDB Configuration
+    mongodb.enabled: "true"
+    mongodb.persistence.size: "10Gi"
+    mongodb.auth.rootPassword: "ArkaMonog2025"
+    mongodb.auth.database: "arkaanalytics"
+    mongodb.auth.username: "arkauser"
+    mongodb.auth.password: "ArkaPass2025"
+    
+    # Redis Configuration
+    redis.enabled: "true"
+    redis.persistence.size: "2Gi"
+    redis.auth.password: "ArkaRedis2025"
+    
+    # Application Configuration
+    configServer.image.tag: "latest"
+    eurekaServer.image.tag: "latest"
+    apiGateway.image.tag: "latest"
+    apiGateway.replicas: "2"
+    ecommerceCore.image.tag: "latest"
+    ecommerceCore.replicas: "2"
+    arcaCotizador.image.tag: "latest"
+    arcaCotizador.replicas: "2"
+    arcaGestorSolicitudes.image.tag: "latest"
+    arcaGestorSolicitudes.replicas: "2"
+    
+    # Monitoring Configuration
+    prometheus.enabled: "true"
+    prometheus.persistence.size: "10Gi"
+    grafana.enabled: "true"
+    grafana.persistence.size: "5Gi"
+    grafana.adminPassword: "ArkaGrafana2025"
+    
+    # Ingress Configuration
+    ingress.enabled: "true"
+    ingress.className: "traefik"
+    ingress.hostname: "arka.local"
+    ingress.tls.enabled: "false"
+---
+# Rancher Pipeline Configuration
+apiVersion: project.cattle.io/v3
+kind: Pipeline
+metadata:
+  name: arka-ecommerce-pipeline
+  namespace: arka-ecommerce
+spec:
+  displayName: "ARKA E-commerce CI/CD Pipeline"
+  sourceCodeConfig:
+    type: "github"
+    sourceCodeCredentialName: "github-token"
+  stages:
+    - name: "Build"
+      steps:
+        - type: "task"
+          runScriptConfig:
+            image: "gradle:8.5-jdk21"
+            shellScript: |
+              echo "Building ARKA E-commerce Platform..."
+              gradle clean build
+              echo "Build completed successfully!"
+    
+    - name: "Test"
+      steps:
+        - type: "task"
+          runScriptConfig:
+            image: "gradle:8.5-jdk21"
+            shellScript: |
+              echo "Running tests..."
+              gradle test
+              gradle integrationTest
+              echo "Tests completed successfully!"
+    
+    - name: "Build Docker Images"
+      steps:
+        - type: "task"
+          runScriptConfig:
+            image: "docker:24.0.0"
+            shellScript: |
+              echo "Building Docker images..."
+              docker build -t arka/config-server:${CICD_EXECUTION_SEQUENCE} config-server/
+              docker build -t arka/eureka-server:${CICD_EXECUTION_SEQUENCE} eureka-server/
+              docker build -t arka/api-gateway:${CICD_EXECUTION_SEQUENCE} api-gateway/
+              docker build -t arka/ecommerce-core:${CICD_EXECUTION_SEQUENCE} .
+              docker build -t arka/arca-cotizador:${CICD_EXECUTION_SEQUENCE} arca-cotizador/
+              docker build -t arka/arca-gestor-solicitudes:${CICD_EXECUTION_SEQUENCE} arca-gestor-solicitudes/
+              docker build -t arka/hello-world-service:${CICD_EXECUTION_SEQUENCE} hello-world-service/
+              echo "Docker images built successfully!"
+    
+    - name: "Push Images"
+      steps:
+        - type: "task"
+          runScriptConfig:
+            image: "docker:24.0.0"
+            shellScript: |
+              echo "Pushing images to registry..."
+              docker tag arka/config-server:${CICD_EXECUTION_SEQUENCE} arka/config-server:latest
+              docker tag arka/eureka-server:${CICD_EXECUTION_SEQUENCE} arka/eureka-server:latest
+              docker tag arka/api-gateway:${CICD_EXECUTION_SEQUENCE} arka/api-gateway:latest
+              docker tag arka/ecommerce-core:${CICD_EXECUTION_SEQUENCE} arka/ecommerce-core:latest
+              docker tag arka/arca-cotizador:${CICD_EXECUTION_SEQUENCE} arka/arca-cotizador:latest
+              docker tag arka/arca-gestor-solicitudes:${CICD_EXECUTION_SEQUENCE} arka/arca-gestor-solicitudes:latest
+              docker tag arka/hello-world-service:${CICD_EXECUTION_SEQUENCE} arka/hello-world-service:latest
+              echo "Images pushed successfully!"
+    
+    - name: "Deploy to Kubernetes"
+      steps:
+        - type: "task"
+          runScriptConfig:
+            image: "rancher/kubectl:v1.28.2"
+            shellScript: |
+              echo "Deploying to Kubernetes..."
+              kubectl apply -f k8s/namespace.yaml
+              kubectl apply -f k8s/mysql.yaml
+              kubectl apply -f k8s/mongodb.yaml
+              kubectl apply -f k8s/redis.yaml
+              kubectl apply -f k8s/config-server.yaml
+              kubectl apply -f k8s/eureka-server.yaml
+              kubectl apply -f k8s/api-gateway.yaml
+              kubectl apply -f k8s/ecommerce-core.yaml
+              kubectl apply -f k8s/arca-cotizador.yaml
+              kubectl apply -f k8s/arca-gestor-solicitudes.yaml
+              kubectl apply -f k8s/hello-world-service.yaml
+              kubectl apply -f k8s/monitoring-prometheus.yaml
+              kubectl apply -f k8s/monitoring-grafana.yaml
+              echo "Deployment completed successfully!"
+              
+              echo "Waiting for services to be ready..."
+              kubectl wait --for=condition=ready pod -l app=mysql -n arka-ecommerce --timeout=300s
+              kubectl wait --for=condition=ready pod -l app=eureka-server -n arka-ecommerce --timeout=300s
+              kubectl wait --for=condition=ready pod -l app=api-gateway -n arka-ecommerce --timeout=300s
+              echo "All services are ready!"
+  trigger:
+    webhookConfig: {}
+---
+# Rancher Workload Templates
+apiVersion: apps.cattle.io/v1beta1
+kind: WorkloadTemplate
+metadata:
+  name: arka-microservice-template
+  namespace: cattle-global-data
+spec:
+  displayName: "ARKA Microservice Template"
+  description: "Template for ARKA microservices deployment"
+  revisions:
+    - name: "v1.0.0"
+      enabled: true
+      files:
+        workload.yaml: |
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ${workload_name}
+            namespace: ${namespace}
+          spec:
+            replicas: ${replicas}
+            selector:
+              matchLabels:
+                app: ${workload_name}
+            template:
+              metadata:
+                labels:
+                  app: ${workload_name}
+              spec:
+                containers:
+                - name: ${workload_name}
+                  image: ${image_name}:${image_tag}
+                  ports:
+                  - containerPort: ${container_port}
+                  env:
+                  - name: SPRING_PROFILES_ACTIVE
+                    value: "k8s"
+                  - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+                    value: "http://eureka-service:8761/eureka/"
+                  resources:
+                    limits:
+                      memory: ${memory_limit}
+                      cpu: ${cpu_limit}
+                    requests:
+                      memory: ${memory_request}
+                      cpu: ${cpu_request}
+        service.yaml: |
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: ${workload_name}-service
+            namespace: ${namespace}
+          spec:
+            type: ClusterIP
+            ports:
+            - port: ${service_port}
+              targetPort: ${container_port}
+            selector:
+              app: ${workload_name}
+      questions:
+        - variable: workload_name
+          label: "Workload Name"
+          type: string
+          required: true
+        - variable: namespace
+          label: "Namespace"
+          type: string
+          default: "arka-ecommerce"
+        - variable: image_name
+          label: "Image Name"
+          type: string
+          required: true
+        - variable: image_tag
+          label: "Image Tag"
+          type: string
+          default: "latest"
+        - variable: replicas
+          label: "Replicas"
+          type: int
+          default: 2
+        - variable: container_port
+          label: "Container Port"
+          type: int
+          required: true
+        - variable: service_port
+          label: "Service Port"
+          type: int
+          required: true
+        - variable: memory_limit
+          label: "Memory Limit"
+          type: string
+          default: "1Gi"
+        - variable: cpu_limit
+          label: "CPU Limit"
+          type: string
+          default: "500m"
+        - variable: memory_request
+          label: "Memory Request"
+          type: string
+          default: "512Mi"
+        - variable: cpu_request
+          label: "CPU Request"
+          type: string
+          default: "250m"

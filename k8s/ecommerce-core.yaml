@@ -1,0 +1,229 @@
+# E-commerce Core Application Secrets
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ecommerce-secrets
+  namespace: arka-ecommerce
+type: Opaque
+data:
+  jwt-secret: QXJrYUVjb21tZXJjZUp3dFNlY3JldEtleTIwMjU=  # ArkaEcommerceJwtSecretKey2025
+  db-password: QXJrYVBhc3MyMDI1                        # ArkaPass2025
+  redis-password: QXJrYVJlZGlzMjAyNQ==                  # ArkaRedis2025
+---
+# E-commerce Core ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-core-config
+  namespace: arka-ecommerce
+data:
+  application.yml: |
+    server:
+      port: 8888
+    
+    spring:
+      application:
+        name: ecommerce-core
+      cloud:
+        config:
+          uri: http://config-server-service:8888
+          fail-fast: false
+          retry:
+            max-attempts: 20
+            initial-interval: 3000
+      datasource:
+        url: jdbc:mysql://mysql-service:3306/arkaecommerce?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+        username: arkauser
+        password: ${DB_PASSWORD}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+      jpa:
+        hibernate:
+          ddl-auto: update
+        show-sql: false
+        database-platform: org.hibernate.dialect.MySQL8Dialect
+        properties:
+          hibernate:
+            format_sql: true
+      data:
+        redis:
+          host: redis-service
+          port: 6379
+          password: ${REDIS_PASSWORD}
+          timeout: 2000ms
+          lettuce:
+            pool:
+              max-active: 8
+              max-idle: 8
+              min-idle: 0
+      webflux:
+        base-path: /api
+    
+    eureka:
+      client:
+        service-url:
+          defaultZone: http://eureka-service:8761/eureka/
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        prefer-ip-address: true
+        hostname: ecommerce-core
+    
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration: 86400000
+      refresh-expiration: 604800000
+    
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+      endpoint:
+        health:
+          show-details: always
+    
+    resilience4j:
+      circuitbreaker:
+        instances:
+          default:
+            register-health-indicator: true
+            sliding-window-size: 10
+            minimum-number-of-calls: 5
+            permitted-number-of-calls-in-half-open-state: 3
+            wait-duration-in-open-state: 30s
+            failure-rate-threshold: 50
+    
+    logging:
+      level:
+        com.arka.arkavalenzuela: DEBUG
+        org.springframework.security: DEBUG
+---
+# E-commerce Core Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-core
+  namespace: arka-ecommerce
+  labels:
+    app: ecommerce-core
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecommerce-core
+  template:
+    metadata:
+      labels:
+        app: ecommerce-core
+        tier: backend
+    spec:
+      containers:
+      - name: ecommerce-core
+        image: arka/ecommerce-core:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8888
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: "http://config-server-service:8888"
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: ecommerce-secrets
+              key: jwt-secret
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ecommerce-secrets
+              key: db-password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ecommerce-secrets
+              key: redis-password
+        volumeMounts:
+        - name: ecommerce-config-volume
+          mountPath: /app/config
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8888
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8888
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: "1.5Gi"
+            cpu: "1000m"
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: ecommerce-config-volume
+        configMap:
+          name: ecommerce-core-config
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for MySQL to be ready..."
+            until nc -z mysql-service 3306; do
+              echo "MySQL not ready, waiting..."
+              sleep 10
+            done
+            echo "MySQL is ready!"
+      - name: wait-for-redis
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for Redis to be ready..."
+            until nc -z redis-service 6379; do
+              echo "Redis not ready, waiting..."
+              sleep 10
+            done
+            echo "Redis is ready!"
+      - name: wait-for-eureka
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for Eureka to be ready..."
+            until nc -z eureka-service 8761; do
+              echo "Eureka not ready, waiting..."
+              sleep 10
+            done
+            echo "Eureka is ready!"
+---
+# E-commerce Core Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-core-service
+  namespace: arka-ecommerce
+  labels:
+    app: ecommerce-core
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8888
+    targetPort: 8888
+    protocol: TCP
+    name: http
+  selector:
+    app: ecommerce-core

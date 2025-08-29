@@ -1,0 +1,131 @@
+# Config Server ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-server-config
+  namespace: arka-ecommerce
+data:
+  application.yml: |
+    server:
+      port: 8888
+    
+    spring:
+      application:
+        name: config-server
+      cloud:
+        config:
+          server:
+            native:
+              search-locations: classpath:/config
+            git:
+              uri: https://github.com/kokedevops/arka-config-repo
+              clone-on-start: true
+              default-label: main
+      security:
+        user:
+          name: config-admin
+          password: ConfigPass2025
+          roles: ADMIN
+    
+    eureka:
+      client:
+        service-url:
+          defaultZone: http://eureka-service:8761/eureka/
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        prefer-ip-address: true
+        hostname: config-server
+    
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+      endpoint:
+        health:
+          show-details: always
+    
+    logging:
+      level:
+        org.springframework.cloud.config: DEBUG
+        org.springframework.security: DEBUG
+---
+# Config Server Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server
+  namespace: arka-ecommerce
+  labels:
+    app: config-server
+    tier: infrastructure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-server
+  template:
+    metadata:
+      labels:
+        app: config-server
+        tier: infrastructure
+    spec:
+      containers:
+      - name: config-server
+        image: arka/config-server:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8888
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8888
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8888
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: config-server-config
+---
+# Config Server Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: config-server-service
+  namespace: arka-ecommerce
+  labels:
+    app: config-server
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8888
+    targetPort: 8888
+    protocol: TCP
+    name: http
+  selector:
+    app: config-server

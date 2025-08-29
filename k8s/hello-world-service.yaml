@@ -1,0 +1,137 @@
+# Hello World Service ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-world-config
+  namespace: arka-ecommerce
+data:
+  application.yml: |
+    server:
+      port: 8083
+    
+    spring:
+      application:
+        name: hello-world-service
+      cloud:
+        config:
+          uri: http://config-server-service:8888
+          fail-fast: false
+          retry:
+            max-attempts: 20
+            initial-interval: 3000
+    
+    eureka:
+      client:
+        service-url:
+          defaultZone: http://eureka-service:8761/eureka/
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        prefer-ip-address: true
+        hostname: hello-world-service
+    
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+      endpoint:
+        health:
+          show-details: always
+    
+    logging:
+      level:
+        com.arka.helloworld: DEBUG
+---
+# Hello World Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-service
+  namespace: arka-ecommerce
+  labels:
+    app: hello-world-service
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-world-service
+  template:
+    metadata:
+      labels:
+        app: hello-world-service
+        tier: backend
+    spec:
+      containers:
+      - name: hello-world-service
+        image: arka/hello-world-service:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8083
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: "http://config-server-service:8888"
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        volumeMounts:
+        - name: hello-config-volume
+          mountPath: /app/config
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8083
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "250m"
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+      volumes:
+      - name: hello-config-volume
+        configMap:
+          name: hello-world-config
+      initContainers:
+      - name: wait-for-eureka
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for Eureka to be ready..."
+            until nc -z eureka-service 8761; do
+              echo "Eureka not ready, waiting..."
+              sleep 10
+            done
+            echo "Eureka is ready!"
+---
+# Hello World Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world-service
+  namespace: arka-ecommerce
+  labels:
+    app: hello-world-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8083
+    targetPort: 8083
+    protocol: TCP
+    name: http
+  selector:
+    app: hello-world-service

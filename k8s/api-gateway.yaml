@@ -1,0 +1,205 @@
+# API Gateway ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: arka-ecommerce
+data:
+  application.yml: |
+    server:
+      port: 8080
+    
+    spring:
+      application:
+        name: api-gateway
+      cloud:
+        config:
+          uri: http://config-server-service:8888
+          fail-fast: false
+          retry:
+            max-attempts: 20
+            initial-interval: 3000
+        gateway:
+          routes:
+            # E-commerce Core Routes
+            - id: ecommerce-core
+              uri: lb://ecommerce-core
+              predicates:
+                - Path=/api/products/**, /api/categories/**, /api/customers/**, /api/orders/**, /api/carts/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: ecommerce-cb
+                    fallbackUri: forward:/fallback/ecommerce
+            
+            # Cotizador Routes
+            - id: arca-cotizador
+              uri: lb://arca-cotizador
+              predicates:
+                - Path=/api/cotizaciones/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: cotizador-cb
+                    fallbackUri: forward:/fallback/cotizador
+            
+            # Gestor Solicitudes Routes
+            - id: arca-gestor-solicitudes
+              uri: lb://arca-gestor-solicitudes
+              predicates:
+                - Path=/api/solicitudes/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: gestor-cb
+                    fallbackUri: forward:/fallback/gestor
+            
+            # Hello World Routes
+            - id: hello-world-service
+              uri: lb://hello-world-service
+              predicates:
+                - Path=/api/hello/**
+              filters:
+                - StripPrefix=1
+    
+    eureka:
+      client:
+        service-url:
+          defaultZone: http://eureka-service:8761/eureka/
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        prefer-ip-address: true
+        hostname: api-gateway
+    
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: "*"
+      endpoint:
+        health:
+          show-details: always
+    
+    logging:
+      level:
+        org.springframework.cloud.gateway: DEBUG
+        reactor.netty: DEBUG
+---
+# API Gateway Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: arka-ecommerce
+  labels:
+    app: api-gateway
+    tier: gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        tier: gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: arka/api-gateway:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: "http://config-server-service:8888"
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://eureka-service:8761/eureka/"
+        volumeMounts:
+        - name: gateway-config-volume
+          mountPath: /app/config
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+      volumes:
+      - name: gateway-config-volume
+        configMap:
+          name: api-gateway-config
+      initContainers:
+      - name: wait-for-eureka
+        image: busybox:1.35
+        command: ['sh', '-c']
+        args:
+          - |
+            echo "Waiting for Eureka to be ready..."
+            until nc -z eureka-service 8761; do
+              echo "Eureka not ready, waiting..."
+              sleep 10
+            done
+            echo "Eureka is ready!"
+---
+# API Gateway Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-service
+  namespace: arka-ecommerce
+  labels:
+    app: api-gateway
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: api-gateway
+---
+# API Gateway Load Balancer Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-lb
+  namespace: arka-ecommerce
+  labels:
+    app: api-gateway
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 8080
+    protocol: TCP
+    name: https
+  selector:
+    app: api-gateway
