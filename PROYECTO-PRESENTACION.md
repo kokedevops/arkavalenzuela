@@ -42,16 +42,6 @@ ARKA es una **plataforma de e-commerce empresarial** construida con **arquitectu
 - ✅ **Resiliencia**: Implementa tolerancia a fallos y recuperación automática
 - ✅ **Multi-canal**: Soporte para web, móvil y APIs de terceros
 
-### 🎯 **Objetivos del Proyecto**
-
-1. **Demostrar Expertise Técnico** en arquitecturas modernas
-2. **Implementar Best Practices** de desarrollo enterprise
-3. **Crear Solución Escalable** para e-commerce real
-4. **Aplicar Patrones Avanzados** (DDD, CQRS, Event Sourcing)
-5. **Preparar para Cloud** con AWS readiness
-
----
-
 ## 🏗️ **ARQUITECTURA DEL SISTEMA**
 
 ### 📐 **Patrón Arquitectónico: Hexagonal + DDD + Microservices**
