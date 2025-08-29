@@ -26,7 +26,7 @@ public class HomeController {
         response.put("version", "1.0.0");
         response.put("status", "Running");
         response.put("port", "8888");
-        response.put("environment", "AWS");
+        response.put("environment", "Kubernetes");
         
         Map<String, String> endpoints = new HashMap<>();
         endpoints.put("Health Check", "/health");
@@ -65,8 +65,8 @@ public class HomeController {
         response.put("timestamp", System.currentTimeMillis());
         
         Map<String, String> database = new HashMap<>();
-        database.put("mysql", "Connected to AWS RDS");
-        database.put("mongodb", "Connected to AWS DocumentDB");
+        database.put("mysql", "Connected to MySQL on Kubernetes");
+        database.put("mongodb", "Connected to MongoDB on Kubernetes");
         
         response.put("database", database);
         

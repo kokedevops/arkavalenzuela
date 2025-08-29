@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Configuración JPA para MySQL/RDS
+ * Configuración JPA para MySQL en Kubernetes
  */
 @Configuration
 @EnableJpaRepositories(

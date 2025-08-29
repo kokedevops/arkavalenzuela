@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/Java-17+-orange" alt="Java"/>
   <img src="https://img.shields.io/badge/Architecture-Hexagonal%20%2B%20DDD-blue" alt="Architecture"/>
   <img src="https://img.shields.io/badge/Docker-Containerized-blue" alt="Docker"/>
-  <img src="https://img.shields.io/badge/AWS-Cloud%20Ready-yellow" alt="AWS"/>
+  <img src="https://img.shields.io/badge/Kubernetes-k3s%20%2B%20Rancher-326CE5" alt="Kubernetes"/>
 </div>
 
 ---
@@ -58,7 +58,7 @@ scripts\start-ecommerce-complete.bat
 - [🌐 Spring Cloud](#-spring-cloud)
 - [🔄 Circuit Breakers](#-circuit-breakers)
 - [🐳 Docker & Containerización](#-docker--containerización)
-- [☁️ AWS Infrastructure](#️-aws-infrastructure)
+- [☁️ Kubernetes Infrastructure](#️-kubernetes-infrastructure)
 - [🧪 Testing Completo](#-testing-completo)
 - [🚀 Deployment](#-deployment)
 - [📊 Monitoring & Observability](#-monitoring--observability)
@@ -899,173 +899,195 @@ docker-compose down -v
 
 ---
 
-## ☁️ Infraestructura AWS
+## ☁️ Infraestructura Kubernetes
 
-### CloudFormation Template (Extracto)
-
-```yaml
-# aws/arka-infrastructure.yaml
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'ARKA Microservices Infrastructure'
-
-Parameters:
-  Environment:
-    Type: String
-    Default: production
-    AllowedValues: [development, staging, production]
-
-Resources:
-  
-  # VPC y Networking
-  ArkaVPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: 10.0.0.0/16
-      EnableDnsHostnames: true
-      EnableDnsSupport: true
-      Tags:
-        - Key: Name
-          Value: !Sub arka-vpc-${Environment}
-  
-  # ECS Cluster para Microservicios
-  ArkaECSCluster:
-    Type: AWS::ECS::Cluster
-    Properties:
-      ClusterName: !Sub arka-cluster-${Environment}
-      CapacityProviders:
-        - FARGATE
-        - FARGATE_SPOT
-      DefaultCapacityProviderStrategy:
-        - CapacityProvider: FARGATE
-          Weight: 1
-        - CapacityProvider: FARGATE_SPOT
-          Weight: 4
-  
-  # Application Load Balancer
-  ArkaALB:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Name: !Sub arka-alb-${Environment}
-      Scheme: internet-facing
-      Type: application
-      Subnets:
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
-      SecurityGroups:
-        - !Ref ALBSecurityGroup
-  
-  # RDS MySQL Multi-AZ
-  ArkaRDSInstance:
-    Type: AWS::RDS::DBInstance
-    Properties:
-      DBName: arkadb
-      DBInstanceIdentifier: !Sub arka-db-${Environment}
-      DBInstanceClass: db.t3.micro
-      Engine: mysql
-      EngineVersion: '8.0'
-      MasterUsername: arkauser
-      MasterUserPassword: !Ref DBPassword
-      AllocatedStorage: 20
-      MultiAZ: true
-      BackupRetentionPeriod: 7
-      VPCSecurityGroups:
-        - !Ref DBSecurityGroup
-      DBSubnetGroupName: !Ref DBSubnetGroup
-  
-  # ElastiCache para sesiones
-  ArkaElastiCache:
-    Type: AWS::ElastiCache::ReplicationGroup
-    Properties:
-      ReplicationGroupId: !Sub arka-redis-${Environment}
-      Description: 'ARKA Session Store'
-      Engine: redis
-      CacheNodeType: cache.t3.micro
-      NumCacheClusters: 2
-      SecurityGroupIds:
-        - !Ref CacheSecurityGroup
-      SubnetGroupName: !Ref CacheSubnetGroup
-```
-
-### ECS Service Definition
+### Configuración de Kubernetes (k3s + Rancher)
 
 ```yaml
-# ecs/arca-cotizador-service.yaml
-ArcarCotizadorService:
-  Type: AWS::ECS::Service
-  Properties:
-    ServiceName: arca-cotizador
-    Cluster: !Ref ArkaECSCluster
-    TaskDefinition: !Ref ArcaCotizadorTaskDefinition
-    DesiredCount: 2
-    LaunchType: FARGATE
-    NetworkConfiguration:
-      AwsvpcConfiguration:
-        SecurityGroups:
-          - !Ref ServiceSecurityGroup
-        Subnets:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
-        AssignPublicIp: ENABLED
-    LoadBalancers:
-      - ContainerName: arca-cotizador
-        ContainerPort: 8081
-        TargetGroupArn: !Ref CotizadorTargetGroup
-    
-ArcaCotizadorTaskDefinition:
-  Type: AWS::ECS::TaskDefinition
-  Properties:
-    Family: arca-cotizador
-    NetworkMode: awsvpc
-    RequiresCompatibilities:
-      - FARGATE
-    Cpu: 512
-    Memory: 1024
-    ExecutionRoleArn: !Ref ECSExecutionRole
-    ContainerDefinitions:
-      - Name: arca-cotizador
-        Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/arka/cotizador:latest
-        PortMappings:
-          - ContainerPort: 8081
-        Environment:
-          - Name: SPRING_PROFILES_ACTIVE
-            Value: aws
-          - Name: SPRING_DATASOURCE_URL
-            Value: !Sub jdbc:mysql://${ArkaRDSInstance.Endpoint.Address}:3306/arkadb
-          - Name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
-            Value: !Sub http://${EurekaServerService}:8761/eureka/
-        LogConfiguration:
-          LogDriver: awslogs
-          Options:
-            awslogs-group: !Ref CotizadorLogGroup
-            awslogs-region: !Ref AWS::Region
-            awslogs-stream-prefix: ecs
+# k8s/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arka-ecommerce
+  labels:
+    project: arka
+    environment: production
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arka-monitoring
+  labels:
+    project: arka
+    component: monitoring
 ```
 
-**🎯 Ejemplo Práctico - AWS Deployment:**
+### MySQL StatefulSet con Almacenamiento Persistente
+
+```yaml
+# k8s/mysql.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: arka-ecommerce
+data:
+  my.cnf: |
+    [mysqld]
+    max_connections=200
+    innodb_buffer_pool_size=256M
+    sql_mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+  namespace: arka-ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root-password
+        - name: MYSQL_DATABASE
+          value: "arka_ecommerce"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+        - name: mysql-config
+          mountPath: /etc/mysql/conf.d
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+      - name: mysql-config
+        configMap:
+          name: mysql-config
+```
+
+### Microservicio Arca Cotizador
+
+```yaml
+# k8s/arca-cotizador.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arca-cotizador
+  namespace: arka-ecommerce
+  labels:
+    app: arca-cotizador
+    component: microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: arca-cotizador
+  template:
+    metadata:
+      labels:
+        app: arca-cotizador
+    spec:
+      initContainers:
+      - name: wait-for-eureka
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z eureka-service 8761; do sleep 2; done']
+      - name: wait-for-mysql
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z mysql-service 3306; do sleep 2; done']
+      containers:
+      - name: arca-cotizador
+        image: arka/arca-cotizador:latest
+        ports:
+        - containerPort: 8081
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "k8s"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://mysql-service.arka-ecommerce.svc.cluster.local:3306/arka_ecommerce"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        - name: EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE
+          value: "http://eureka-service.arka-ecommerce.svc.cluster.local:8761/eureka/"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8081
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arca-cotizador-service
+  namespace: arka-ecommerce
+spec:
+  selector:
+    app: arca-cotizador
+  ports:
+  - port: 8081
+    targetPort: 8081
+  type: ClusterIP
+```
+
+**🎯 Ejemplo Práctico - Kubernetes Deployment:**
 
 ```bash
-# 1. Crear infraestructura con CloudFormation
-aws cloudformation create-stack \
-  --stack-name arka-infrastructure \
-  --template-body file://aws/arka-infrastructure.yaml \
-  --parameters ParameterKey=Environment,ParameterValue=production \
-  --capabilities CAPABILITY_IAM
+# 1. Desplegar toda la infraestructura
+./k8s/deploy-k8s.sh
 
-# 2. Build y push de imágenes a ECR
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
+# 2. Verificar el despliegue
+kubectl get pods -n arka-ecommerce
 
-docker build -t arka/cotizador ./arca-cotizador
-docker tag arka/cotizador:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/arka/cotizador:latest
-docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/arka/cotizador:latest
-
-# 3. Deploy servicios ECS
-aws ecs update-service \
-  --cluster arka-cluster-production \
-  --service arca-cotizador \
-  --force-new-deployment
+# 3. Acceder a la aplicación
+echo "127.0.0.1 arka-ecommerce.local" >> /etc/hosts
+curl http://arka-ecommerce.local/api/health
 
 # 4. Monitoreo
-aws logs tail /aws/ecs/arca-cotizador --follow
+kubectl logs -f deployment/ecommerce-core -n arka-ecommerce
+kubectl port-forward -n arka-monitoring svc/grafana 3000:3000
 ```
 
 ---
@@ -1295,22 +1317,23 @@ jobs:
       
       - name: Build and push Docker images
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REGISTRY: arka
         run: |
           # Build cada microservicio
-          docker build -t $ECR_REGISTRY/arka/cotizador:$GITHUB_SHA ./arca-cotizador
-          docker build -t $ECR_REGISTRY/arka/gestor:$GITHUB_SHA ./arca-gestor-solicitudes
-          docker build -t $ECR_REGISTRY/arka/gateway:$GITHUB_SHA ./api-gateway
+          docker build -t $REGISTRY/cotizador:$GITHUB_SHA ./arca-cotizador
+          docker build -t $REGISTRY/gestor:$GITHUB_SHA ./arca-gestor-solicitudes
+          docker build -t $REGISTRY/gateway:$GITHUB_SHA ./api-gateway
           
-          # Push images
-          docker push $ECR_REGISTRY/arka/cotizador:$GITHUB_SHA
-          docker push $ECR_REGISTRY/arka/gestor:$GITHUB_SHA
-          docker push $ECR_REGISTRY/arka/gateway:$GITHUB_SHA
+          # Tag images for Kubernetes
+          docker tag $REGISTRY/cotizador:$GITHUB_SHA $REGISTRY/cotizador:latest
+          docker tag $REGISTRY/gestor:$GITHUB_SHA $REGISTRY/gestor:latest
+          docker tag $REGISTRY/gateway:$GITHUB_SHA $REGISTRY/gateway:latest
       
-      - name: Deploy to ECS
+      - name: Deploy to Kubernetes
         run: |
-          aws ecs update-service --cluster arka-cluster-production --service arca-cotizador --force-new-deployment
-          aws ecs update-service --cluster arka-cluster-production --service arca-gestor-solicitudes --force-new-deployment
+          kubectl apply -f k8s/
+          kubectl set image deployment/arca-cotizador arca-cotizador=$REGISTRY/cotizador:$GITHUB_SHA -n arka-ecommerce
+          kubectl set image deployment/arca-gestor-solicitudes arca-gestor-solicitudes=$REGISTRY/gestor:$GITHUB_SHA -n arka-ecommerce
 ```
 
 ### Monitoring y Observabilidad

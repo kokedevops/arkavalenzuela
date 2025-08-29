@@ -143,7 +143,7 @@ build_war() {
 
 # Función para iniciar con Gradle
 start_with_gradle() {
-    local profile="${1:-aws}"
+    local profile="${1:-k8s}"
     local port="${2:-8888}"
     
     show_status "Iniciando ARKA Central con Gradle (Profile: $profile, Puerto: $port)..."
@@ -174,7 +174,7 @@ start_with_gradle() {
 
 # Función para iniciar con JAR
 start_with_jar() {
-    local profile="${1:-aws}"
+    local profile="${1:-k8s}"
     local port="${2:-8888}"
     
     show_status "Iniciando ARKA Central con JAR (Profile: $profile, Puerto: $port)..."
@@ -281,10 +281,10 @@ show_build_info() {
         
         echo "💡 Comandos sugeridos:"
         if [ -n "$jars" ]; then
-            echo "   • JAR: java -jar build/libs/arkajvalenzuela-*.jar --spring.profiles.active=aws"
+            echo "   • JAR: java -jar build/libs/arkajvalenzuela-*.jar --spring.profiles.active=k8s"
         fi
         if [ -n "$wars" ]; then
-            echo "   • WAR: java -jar build/libs/arkajvalenzuela-*-SNAPSHOT.war --spring.profiles.active=aws"
+            echo "   • WAR: java -jar build/libs/arkajvalenzuela-*-SNAPSHOT.war --spring.profiles.active=k8s"
             echo "   • Payara: asadmin deploy build/libs/arkajvalenzuela-*-plain.war"
         fi
     else
@@ -300,8 +300,8 @@ show_usage() {
     echo "Uso: $0 [comando] [opciones]"
     echo ""
     echo "📋 Comandos:"
-    echo "  start-gradle [profile] [port]  - Iniciar con Gradle (default: aws, 8888)"
-    echo "  start-jar [profile] [port]     - Iniciar con JAR/WAR (default: aws, 8888)"
+    echo "  start-gradle [profile] [port]  - Iniciar con Gradle (default: k8s, 8888)"
+    echo "  start-jar [profile] [port]     - Iniciar con JAR/WAR (default: k8s, 8888)"
     echo "  stop                           - Detener ARKA Central"
     echo "  status                         - Ver estado"
     echo "  logs                           - Ver logs"
@@ -312,9 +312,9 @@ show_usage() {
     echo "  restart-jar [profile]          - Reiniciar con JAR/WAR"
     echo ""
     echo "📝 Ejemplos:"
-    echo "  $0 start-gradle                # Iniciar con Gradle (perfil aws)"
+    echo "  $0 start-gradle                # Iniciar con Gradle (perfil k8s)"
     echo "  $0 start-gradle dev 8889       # Iniciar con perfil dev en puerto 8889"
-    echo "  $0 start-jar aws               # Iniciar con JAR/WAR (perfil aws)"
+    echo "  $0 start-jar k8s               # Iniciar con JAR/WAR (perfil k8s)"
     echo "  $0 build-war                   # Construir WAR para java -jar y Payara"
     echo "  $0 info                        # Ver archivos JAR/WAR disponibles"
     echo ""

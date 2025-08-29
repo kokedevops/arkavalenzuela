@@ -685,7 +685,7 @@ Accept: application/json
 2. **Ejecutar manualmente:**
    ```bash
    ./gradlew clean build -x test
-   java -jar build/libs/arkajvalenzuela-0.0.1-SNAPSHOT.war --spring.profiles.active=aws
+   java -jar build/libs/arkajvalenzuela-0.0.1-SNAPSHOT.war --spring.profiles.active=k8s
    ```
 
 3. **Verificar estado:**

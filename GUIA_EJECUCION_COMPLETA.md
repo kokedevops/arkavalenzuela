@@ -511,17 +511,19 @@ curl -X PUT http://localhost:8090/api/cotizaciones/1/aceptar
 
 ## 🚀 DEPLOYMENT PRODUCTION
 
-### AWS (Ver AWS-CLOUD-IMPLEMENTATION.md)
+### Kubernetes (Ver k8s/README.md)
 ```bash
-# Usar CloudFormation templates incluidos
-aws cloudformation create-stack --stack-name arka-prod \
-  --template-body file://aws/arka-infrastructure.yaml
+# Desplegar en Kubernetes con k3s/Rancher
+./k8s/deploy-k8s.sh
+
+# Verificar el despliegue
+./k8s/validate-deployment.sh
 ```
 
-### Docker Swarm
+### Docker Compose (Desarrollo Local)
 ```bash
-docker swarm init
-docker stack deploy -c docker-compose.prod.yml arka
+docker compose up -d
+docker compose logs -f
 ```
 
 ---

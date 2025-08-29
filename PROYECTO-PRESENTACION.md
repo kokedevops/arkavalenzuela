@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen" alt="Spring Boot"/>
   <img src="https://img.shields.io/badge/Java-21-orange" alt="Java"/>
   <img src="https://img.shields.io/badge/Pattern-Hexagonal%20%2B%20DDD-purple" alt="Architecture"/>
-  <img src="https://img.shields.io/badge/Cloud-AWS%20Ready-yellow" alt="AWS"/>
+  <img src="https://img.shields.io/badge/Cloud-Kubernetes%20Ready-326CE5" alt="Kubernetes"/>
   <img src="https://img.shields.io/badge/Security-JWT-red" alt="Security"/>
 </div>
 
@@ -48,7 +48,7 @@ ARKA es una **plataforma de e-commerce empresarial** construida con **arquitectu
 2. **Implementar Best Practices** de desarrollo enterprise
 3. **Crear Solución Escalable** para e-commerce real
 4. **Aplicar Patrones Avanzados** (DDD, CQRS, Event Sourcing)
-5. **Preparar para Cloud** con AWS readiness
+5. **Preparar para Cloud** con Kubernetes readiness
 
 ---
 
@@ -185,10 +185,10 @@ graph TB
 
 | Tecnología | Uso | Implementación |
 |------------|-----|----------------|
-| **AWS EC2** | Compute | Instancias optimizadas |
-| **AWS RDS** | Database | MySQL managed |
-| **AWS DocumentDB** | NoSQL | MongoDB compatible |
-| **AWS LoadBalancer** | Load balancing | Alta disponibilidad |
+| **Kubernetes** | Container orchestration | k3s + Rancher |
+| **MySQL on K8s** | Database | StatefulSet with PVC |
+| **MongoDB on K8s** | NoSQL | Pod with persistent storage |
+| **Traefik Ingress** | Load balancing | Alta disponibilidad |
 | **GitHub Actions** | CI/CD | Automated deployment |
 
 ---
@@ -720,14 +720,13 @@ jobs:
           docker build -t arka-eureka:${{ github.sha }} ./eureka-server
           docker build -t arka-gateway:${{ github.sha }} ./api-gateway
       
-      - name: Deploy to AWS
+      - name: Deploy to Kubernetes
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
         run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-          docker tag arka-ecommerce:${{ github.sha }} ${{ secrets.ECR_REGISTRY }}/arka-ecommerce:${{ github.sha }}
-          docker push ${{ secrets.ECR_REGISTRY }}/arka-ecommerce:${{ github.sha }}
+          kubectl apply -f k8s/
+          kubectl set image deployment/ecommerce-core ecommerce-core=arka/ecommerce-core:${{ github.sha }} -n arka-ecommerce
+          kubectl rollout status deployment/ecommerce-core -n arka-ecommerce
 ```
 
 ---

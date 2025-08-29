@@ -4,8 +4,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuración para múltiples stores de datos
- * - JPA para MySQL (RDS) - configurado en JpaConfiguration
- * - MongoDB para DocumentDB - configurado en MongoConfiguration
+ * - JPA para MySQL (Kubernetes) - configurado en JpaConfiguration
+ * - MongoDB para Kubernetes - configurado en MongoConfiguration
  * - R2DBC para acceso reactivo a MySQL - deshabilitado por defecto
  */
 @Configuration

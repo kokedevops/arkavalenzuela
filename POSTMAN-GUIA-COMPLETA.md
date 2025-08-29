@@ -419,8 +419,8 @@ GET {{ARKA_BASE_URL}}/health
   "port": "8888",
   "timestamp": 1693123456789,
   "database": {
-    "mysql": "Connected to AWS RDS",
-    "mongodb": "Connected to AWS DocumentDB"
+    "mysql": "Connected to MySQL on Kubernetes",
+    "mongodb": "Connected to MongoDB on Kubernetes"
   }
 }
 ```

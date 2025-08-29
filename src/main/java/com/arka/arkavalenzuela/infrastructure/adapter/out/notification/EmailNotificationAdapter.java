@@ -20,7 +20,7 @@ public class EmailNotificationAdapter implements NotificationPort {
     public void sendEmail(String to, String subject, String body) {
         // In a real implementation, this would integrate with an email service like:
         // - SendGrid
-        // - Amazon SES
+        // - Kubernetes SMTP relay
         // - SMTP server
         // - etc.
         

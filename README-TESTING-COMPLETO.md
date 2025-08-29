@@ -33,8 +33,8 @@ http://localhost:8888
 # 🌐 API Gateway (Local)
 http://localhost:8080
 
-# ☁️ Production Server (AWS)
-http://3.134.244.104:8888
+# ☁️ Production Server (Kubernetes)
+http://arka-ecommerce.local
 
 # 🔍 Service Discovery
 http://localhost:8761
@@ -775,7 +775,7 @@ Authorization: Bearer tu_access_token
 - JWT Authentication completo
 - BFF para Web y Mobile
 - Endpoints RESTful completos
-- Base de datos AWS RDS + DocumentDB
+- Base de datos MySQL + MongoDB en Kubernetes
 - Autenticación y autorización avanzada
 
 **🚀 Sistema listo para producción con todas las funcionalidades solicitadas.**

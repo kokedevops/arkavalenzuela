@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/Docker-Enabled-blue" alt="Docker"/>
   <img src="https://img.shields.io/badge/Architecture-Hexagonal-orange" alt="Hexagonal"/>
   <img src="https://img.shields.io/badge/Security-JWT-red" alt="JWT"/>
-  <img src="https://img.shields.io/badge/Cloud-AWS%20%7C%20Kubernetes-yellow" alt="Cloud"/>
+  <img src="https://img.shields.io/badge/Cloud-Kubernetes%20%7C%20k3s-yellow" alt="Cloud"/>
   <img src="https://img.shields.io/badge/Kubernetes-k3s%20%7C%20Rancher-326CE5" alt="Kubernetes"/>
   <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT"/>
 </div>
