@@ -120,10 +120,21 @@ build_war() {
     
     if [ $? -eq 0 ]; then
         show_success "WAR construido exitosamente"
-        ls -la build/libs/arkajvalenzuela-*.war
         echo ""
-        echo "💡 Para desplegar en Payara:"
-        echo "   asadmin deploy build/libs/arkajvalenzuela-*.war"
+        echo "📦 Archivos generados:"
+        ls -lh build/libs/arkajvalenzuela-*.war
+        echo ""
+        echo "� Tipos de WAR:"
+        echo "├── 🚀 arkajvalenzuela-*-SNAPSHOT.war (Fat WAR)"
+        echo "│   └── Para: java -jar archivo.war"
+        echo "│   └── Contiene: Todas las dependencias + servidor embebido"
+        echo "└── 📤 arkajvalenzuela-*-plain.war (Plain WAR)"
+        echo "    └── Para: Despliegue en Payara/Tomcat"
+        echo "    └── Contiene: Solo código de aplicación"
+        echo ""
+        echo "💡 Comandos:"
+        echo "   • Ejecutar: java -jar build/libs/arkajvalenzuela-*-SNAPSHOT.war"
+        echo "   • Payara:   asadmin deploy build/libs/arkajvalenzuela-*-plain.war"
     else
         show_error "Error construyendo WAR"
         exit 1
@@ -170,13 +181,32 @@ start_with_jar() {
     
     cd "$PROJECT_DIR"
     
-    # Buscar JAR
+    # Buscar JAR o WAR ejecutable (fat WAR sin "plain")
     local jar_file=$(ls build/libs/arkajvalenzuela-*.jar 2>/dev/null | head -1)
+    local war_file=$(ls build/libs/arkajvalenzuela-*[0-9].war 2>/dev/null | grep -v plain | head -1)
     
-    if [ ! -f "$jar_file" ]; then
-        show_warning "JAR no encontrado. Construyendo..."
+    # Preferir JAR, si no existe usar WAR ejecutable
+    local executable_file=""
+    if [ -f "$jar_file" ]; then
+        executable_file="$jar_file"
+        show_status "Usando JAR: $executable_file"
+    elif [ -f "$war_file" ]; then
+        executable_file="$war_file"
+        show_status "Usando WAR ejecutable: $executable_file"
+    else
+        show_warning "Ni JAR ni WAR encontrados. Construyendo..."
         build_jar
-        jar_file=$(ls build/libs/arkajvalenzuela-*.jar | head -1)
+        jar_file=$(ls build/libs/arkajvalenzuela-*.jar 2>/dev/null | head -1)
+        war_file=$(ls build/libs/arkajvalenzuela-*[0-9].war 2>/dev/null | grep -v plain | head -1)
+        
+        if [ -f "$jar_file" ]; then
+            executable_file="$jar_file"
+        elif [ -f "$war_file" ]; then
+            executable_file="$war_file"
+        else
+            show_error "No se pudo generar archivo ejecutable"
+            exit 1
+        fi
     fi
     
     # Verificar puerto
@@ -186,13 +216,13 @@ start_with_jar() {
     fi
     
     # Iniciar en background
-    nohup java -Xmx2g -Xms1g -jar "$jar_file" --spring.profiles.active=$profile --server.port=$port > "$LOGS_DIR/arka-central.log" 2>&1 &
+    nohup java -Xmx2g -Xms1g -jar "$executable_file" --spring.profiles.active=$profile --server.port=$port > "$LOGS_DIR/arka-central.log" 2>&1 &
     local pid=$!
     
     echo $pid > "$PID_FILE"
     
     show_success "ARKA Central iniciado con PID $pid"
-    show_status "JAR: $jar_file"
+    show_status "Archivo ejecutable: $executable_file"
     show_status "Logs: $LOGS_DIR/arka-central.log"
     
     # Esperar un poco y verificar
@@ -213,6 +243,55 @@ show_logs() {
     fi
 }
 
+# Función para mostrar información de archivos construidos
+show_build_info() {
+    show_status "Información de archivos construidos:"
+    echo ""
+    
+    if [ -d "$PROJECT_DIR/build/libs" ]; then
+        echo "📁 Directorio: $PROJECT_DIR/build/libs"
+        echo ""
+        
+        # Buscar JARs
+        local jars=$(ls "$PROJECT_DIR/build/libs"/*.jar 2>/dev/null || true)
+        if [ -n "$jars" ]; then
+            echo "☕ Archivos JAR:"
+            ls -lh "$PROJECT_DIR/build/libs"/*.jar 2>/dev/null
+            echo ""
+        fi
+        
+        # Buscar WARs
+        local wars=$(ls "$PROJECT_DIR/build/libs"/*.war 2>/dev/null || true)
+        if [ -n "$wars" ]; then
+            echo "📦 Archivos WAR:"
+            ls -lh "$PROJECT_DIR/build/libs"/*.war 2>/dev/null
+            echo ""
+            
+            echo "📝 Explicación de tipos WAR:"
+            echo "├── 🚀 *-SNAPSHOT.war (Fat WAR - Recomendado para java -jar)"
+            echo "│   ├── Contiene: Todas las dependencias + Tomcat embebido"
+            echo "│   ├── Tamaño: ~50-100+ MB"
+            echo "│   └── Uso: java -jar archivo.war"
+            echo "└── 📤 *-plain.war (Plain WAR - Para servidores externos)"
+            echo "    ├── Contiene: Solo código de aplicación"
+            echo "    ├── Tamaño: ~1-5 MB"
+            echo "    └── Uso: asadmin deploy archivo-plain.war"
+            echo ""
+        fi
+        
+        echo "💡 Comandos sugeridos:"
+        if [ -n "$jars" ]; then
+            echo "   • JAR: java -jar build/libs/arkajvalenzuela-*.jar --spring.profiles.active=aws"
+        fi
+        if [ -n "$wars" ]; then
+            echo "   • WAR: java -jar build/libs/arkajvalenzuela-*-SNAPSHOT.war --spring.profiles.active=aws"
+            echo "   • Payara: asadmin deploy build/libs/arkajvalenzuela-*-plain.war"
+        fi
+    else
+        show_warning "No se encontró directorio build/libs. Ejecuta 'build-jar' o 'build-war' primero."
+    fi
+}
+
 # Función de ayuda
 show_usage() {
     echo "🚀 ARKA Central Manager"
@@ -222,20 +301,26 @@ show_usage() {
     echo ""
     echo "📋 Comandos:"
     echo "  start-gradle [profile] [port]  - Iniciar con Gradle (default: aws, 8888)"
-    echo "  start-jar [profile] [port]     - Iniciar con JAR (default: aws, 8888)"
+    echo "  start-jar [profile] [port]     - Iniciar con JAR/WAR (default: aws, 8888)"
     echo "  stop                           - Detener ARKA Central"
     echo "  status                         - Ver estado"
     echo "  logs                           - Ver logs"
     echo "  build-jar                      - Construir JAR"
-    echo "  build-war                      - Construir WAR"
+    echo "  build-war                      - Construir WAR (Fat + Plain)"
+    echo "  info                           - Mostrar archivos construidos"
     echo "  restart-gradle [profile]       - Reiniciar con Gradle"
-    echo "  restart-jar [profile]          - Reiniciar con JAR"
+    echo "  restart-jar [profile]          - Reiniciar con JAR/WAR"
     echo ""
     echo "📝 Ejemplos:"
     echo "  $0 start-gradle                # Iniciar con Gradle (perfil aws)"
     echo "  $0 start-gradle dev 8889       # Iniciar con perfil dev en puerto 8889"
-    echo "  $0 start-jar aws               # Iniciar con JAR (perfil aws)"
-    echo "  $0 build-war                   # Construir WAR para Payara"
+    echo "  $0 start-jar aws               # Iniciar con JAR/WAR (perfil aws)"
+    echo "  $0 build-war                   # Construir WAR para java -jar y Payara"
+    echo "  $0 info                        # Ver archivos JAR/WAR disponibles"
+    echo ""
+    echo "📦 Sobre archivos WAR:"
+    echo "  • arkajvalenzuela-*-SNAPSHOT.war     → Para java -jar (Fat WAR)"
+    echo "  • arkajvalenzuela-*-plain.war        → Para Payara/Tomcat (Plain WAR)"
     echo ""
 }
 
@@ -264,6 +349,9 @@ main() {
             ;;
         "build-war"|"war-build")
             build_war
+            ;;
+        "info"|"files")
+            show_build_info
             ;;
         "restart-gradle"|"restart")
             stop_arka_central
