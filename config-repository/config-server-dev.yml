@@ -1,0 +1,72 @@
+# 🏗️ ARKA Config Server - Development Profile
+# Configuración específica para el Config Server
+
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  
+  # Config Server specific configuration
+  cloud:
+    config:
+      server:
+        # Native configuration (local files)
+        native:
+          search-locations: file:../config-repository
+        # Git configuration (backup option)
+        git:
+          uri: file://${user.dir}/config-repository
+          clone-on-start: true
+          force-pull: true
+          timeout: 10
+          refresh-rate: 60
+  
+  # Security for Config Server
+  security:
+    user:
+      name: config-admin
+      password: config-secret
+      roles: ADMIN
+
+# Eureka Configuration for Config Server
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: localhost
+    prefer-ip-address: true
+
+# Management specific for Config Server
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,configprops,refresh,restart,beans
+  endpoint:
+    health:
+      show-details: always
+    refresh:
+      enabled: true
+
+# Application Info
+info:
+  app:
+    name: ARKA Config Server
+    description: Servidor de configuración centralizado para microservicios ARKA E-commerce
+    version: 1.0.0
+    profiles: dev
+  config:
+    location: file:../config-repository
+    security: basic-auth
+
+# Logging for Config Server
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    org.springframework.security: INFO
+    com.arkavalenzuela: DEBUG

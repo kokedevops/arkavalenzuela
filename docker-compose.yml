@@ -5,6 +5,31 @@ services:
   # Service Discovery & Configuration
   # =================================
   
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    container_name: arka-config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8888
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    volumes:
+      - ./config-repository:/app/config-repository
+    networks:
+      - arka-network
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   eureka-server:
     build:
       context: ./eureka-server
