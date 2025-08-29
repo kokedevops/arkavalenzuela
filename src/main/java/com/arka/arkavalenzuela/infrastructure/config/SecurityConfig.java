@@ -1,11 +1,15 @@
 package com.arka.arkavalenzuela.infrastructure.config;
 
+import com.arka.arkavalenzuela.infrastructure.config.security.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,19 +17,25 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.Customizer;
 
 /**
- * Configuración de seguridad para la aplicación principal ARKA
+ * Configuración de seguridad para la aplicación principal ARKA con JWT
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable()) // Deshabilitamos CSRF para APIs REST
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sin sesiones, usamos JWT
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/error", "/login").permitAll() // Página de inicio, errores y login públicos
                 .requestMatchers("/health", "/actuator/**").permitAll() // Health checks
@@ -37,17 +47,8 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
                 .anyRequest().authenticated() // Todo lo demás requiere autenticación
             )
-            .httpBasic(Customizer.withDefaults()) // Habilitamos autenticación básica HTTP
-            .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/api/dashboard")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
-                .logoutSuccessUrl("/")
-                .permitAll()
-            );
+            .httpBasic(Customizer.withDefaults()) // Mantenemos Basic Auth como fallback
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // Agregar filtro JWT
         
         return http.build();
     }

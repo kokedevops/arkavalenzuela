@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARKA E-commerce - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo h1 {
+            color: #4f46e5;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .login-btn:hover {
+            background: #4338ca;
+        }
+        
+        .login-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .demo-users {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .demo-users h3 {
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        
+        .quick-login {
+            margin-top: 0.5rem;
+        }
+        
+        .quick-btn {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-right: 0.25rem;
+            transition: background-color 0.3s;
+        }
+        
+        .quick-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🛍️ ARKA</h1>
+            <p>E-commerce Platform</p>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="identifier">Usuario:</label>
+                <input type="text" id="identifier" name="identifier" required placeholder="admin, user, demo">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" required placeholder="Ingresa tu contraseña">
+            </div>
+            
+            <button type="submit" class="login-btn" id="loginButton">
+                <span id="buttonText">Iniciar Sesión</span>
+                <span id="buttonLoader" class="loading" style="display: none;"></span>
+            </button>
+        </form>
+        
+        <div id="message"></div>
+        
+        <div class="demo-users">
+            <h3>👤 Usuarios de Prueba:</h3>
+            <div class="user-item">
+                <span><strong>admin</strong></span>
+                <span>admin123 (ADMIN)</span>
+            </div>
+            <div class="user-item">
+                <span><strong>user</strong></span>
+                <span>user123 (USER)</span>
+            </div>
+            <div class="user-item">
+                <span><strong>demo</strong></span>
+                <span>demo123 (USER)</span>
+            </div>
+            
+            <div class="quick-login">
+                <strong>Quick Login:</strong>
+                <button class="quick-btn" onclick="quickLogin('admin', 'admin123')">Admin</button>
+                <button class="quick-btn" onclick="quickLogin('user', 'user123')">User</button>
+                <button class="quick-btn" onclick="quickLogin('demo', 'demo123')">Demo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de la API
+        const API_BASE_URL = 'http://3.134.244.104:8888';
+        
+        // Referencias a elementos del DOM
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const buttonText = document.getElementById('buttonText');
+        const buttonLoader = document.getElementById('buttonLoader');
+        const messageDiv = document.getElementById('message');
+        const identifierInput = document.getElementById('identifier');
+        const passwordInput = document.getElementById('password');
+
+        // Función principal de login
+        async function login(identifier, password) {
+            try {
+                // Mostrar loading
+                setLoading(true);
+                showMessage('Iniciando sesión...', 'info');
+
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        identifier: identifier,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Login exitoso
+                    showMessage(`¡Bienvenido ${data.username}! 🎉`, 'success');
+                    
+                    // Guardar información del usuario en localStorage
+                    localStorage.setItem('userInfo', JSON.stringify({
+                        username: data.username,
+                        authorities: data.authorities,
+                        loginTime: new Date().toISOString()
+                    }));
+
+                    // Redirigir después de 2 segundos
+                    setTimeout(() => {
+                        // Aquí puedes redirigir a la página principal de tu aplicación
+                        window.location.href = '/dashboard.html'; // o la página que necesites
+                        // window.location.href = `${API_BASE_URL}/`; // o directamente al API
+                    }, 2000);
+
+                } else {
+                    // Error de autenticación
+                    showMessage(data.message || 'Error de autenticación', 'error');
+                }
+
+            } catch (error) {
+                console.error('Error en login:', error);
+                showMessage('Error de conexión. Verifica que el servidor esté funcionando.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Función para login rápido con botones
+        function quickLogin(username, password) {
+            identifierInput.value = username;
+            passwordInput.value = password;
+            login(username, password);
+        }
+
+        // Función para mostrar loading
+        function setLoading(isLoading) {
+            loginButton.disabled = isLoading;
+            if (isLoading) {
+                buttonText.style.display = 'none';
+                buttonLoader.style.display = 'inline-block';
+            } else {
+                buttonText.style.display = 'inline-block';
+                buttonLoader.style.display = 'none';
+            }
+        }
+
+        // Función para mostrar mensajes
+        function showMessage(message, type) {
+            messageDiv.innerHTML = message;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+        }
+
+        // Event listener para el formulario
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const identifier = identifierInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!identifier || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            await login(identifier, password);
+        });
+
+        // Verificar si ya hay una sesión activa
+        function checkExistingSession() {
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                const user = JSON.parse(userInfo);
+                showMessage(`Ya tienes una sesión activa como ${user.username}`, 'success');
+            }
+        }
+
+        // Función para verificar el estado de autenticación en el servidor
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/status`);
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    showMessage(`Sesión activa: ${data.username}`, 'success');
+                }
+            } catch (error) {
+                console.log('No hay sesión activa en el servidor');
+            }
+        }
+
+        // Inicializar cuando la página carga
+        document.addEventListener('DOMContentLoaded', () => {
+            checkExistingSession();
+            checkAuthStatus();
+        });
+
+        // Función para logout (útil para desarrollar)
+        function logout() {
+            localStorage.removeItem('userInfo');
+            fetch(`${API_BASE_URL}/api/auth/logout`, { method: 'POST' })
+                .then(() => {
+                    showMessage('Sesión cerrada', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                });
+        }
+
+        // Exponer logout globalmente para debugging
+        window.logout = logout;
+    </script>
+</body>
+</html>

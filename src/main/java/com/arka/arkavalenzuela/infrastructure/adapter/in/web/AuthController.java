@@ -61,6 +61,46 @@ public class AuthController {
     }
 
     /**
+     * Información sobre cómo hacer login (GET request)
+     */
+    @GetMapping("/login")
+    public ResponseEntity<Map<String, Object>> loginInfo() {
+        Map<String, Object> response = new HashMap<>();
+        
+        response.put("message", "Login endpoint information");
+        response.put("method", "POST");
+        response.put("endpoint", "/api/auth/login");
+        response.put("contentType", "application/json");
+        
+        Map<String, Object> jsonExample = new HashMap<>();
+        jsonExample.put("identifier", "admin");
+        jsonExample.put("password", "admin123");
+        
+        response.put("jsonBody", jsonExample);
+        
+        Map<String, String> curlExample = new HashMap<>();
+        curlExample.put("command", "curl -X POST http://3.134.244.104:8888/api/auth/login -H \"Content-Type: application/json\" -d '{\"identifier\":\"admin\",\"password\":\"admin123\"}'");
+        
+        response.put("curlExample", curlExample);
+        
+        Map<String, String> users = new HashMap<>();
+        users.put("admin", "admin123 (ADMIN, USER roles)");
+        users.put("user", "user123 (USER role)");
+        users.put("demo", "demo123 (USER role)");
+        
+        response.put("availableUsers", users);
+        
+        Map<String, String> alternatives = new HashMap<>();
+        alternatives.put("httpBasicAuth", "Use Authorization header with Basic auth");
+        alternatives.put("statusCheck", "GET /api/auth/status");
+        alternatives.put("demoUsers", "GET /api/auth/demo-users");
+        
+        response.put("alternatives", alternatives);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Endpoint para verificar el estado de autenticación
      */
     @GetMapping("/status")
