@@ -36,11 +36,8 @@
 
 ---
 
-## 🎯 **RESUMEN EJECUTIVO**
-
 **ARKA Valenzuela** es una **plataforma e-commerce empresarial** construida con **arquitectura de microservicios**, implementando patrones modernos de desarrollo, seguridad robusta y tecnologías cloud-native para máxima escalabilidad y mantenibilidad.
 
-### 🏆 **Cumplimiento Académico**
 ✅ **Arquitectura Hexagonal + DDD** - Separación clara de responsabilidades  
 ✅ **Programación Reactiva** - WebFlux con Mono/Flux  
 ✅ **Spring Cloud** - Eureka, Gateway, Config, Circuit Breakers  
@@ -50,8 +47,6 @@
 ✅ **Testing** - Pruebas unitarias, integración y API  
 
 ---
-
-## 🚀 **CARACTERÍSTICAS PRINCIPALES**
 
 ### 🎯 **Tecnologías Core**
 - ✅ **Spring Boot 3.2.3** - Framework principal
