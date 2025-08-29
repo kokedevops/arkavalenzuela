@@ -1,14 +1,12 @@
 package com.arka.gateway.config;
 
 import com.arka.security.service.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -17,11 +15,12 @@ import java.util.function.Predicate;
 
 /**
  * Filtro global de autenticación JWT para el API Gateway
+ * TEMPORALMENTE DESACTIVADO para permitir arranque sin dependencias de seguridad
  */
-@Component
+//@Component
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     
-    @Autowired
+    //@Autowired
     private JwtService jwtService;
     
     // Rutas que no requieren autenticación

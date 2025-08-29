@@ -25,15 +25,8 @@ public class GatewaySecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeExchange(exchanges -> exchanges
-                        // Endpoints públicos
-                        .pathMatchers("/auth/**").permitAll()
-                        .pathMatchers("/actuator/health", "/actuator/info").permitAll()
-                        .pathMatchers("/eureka/**").permitAll()
-                        // Todos los demás endpoints requieren autenticación
-                        .anyExchange().authenticated()
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwkSetUri("http://localhost:8080/.well-known/jwks.json"))
+                        // Permitir todos los endpoints temporalmente
+                        .anyExchange().permitAll()
                 )
                 .build();
     }
