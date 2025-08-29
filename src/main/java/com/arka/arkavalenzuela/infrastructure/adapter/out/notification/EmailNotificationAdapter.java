@@ -3,6 +3,7 @@ package com.arka.arkavalenzuela.infrastructure.adapter.out.notification;
 import com.arka.arkavalenzuela.domain.port.out.NotificationPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
  * Implements email sending functionality for e-commerce notifications
  */
 @Component
+@Primary
 public class EmailNotificationAdapter implements NotificationPort {
     
     private static final Logger logger = LoggerFactory.getLogger(EmailNotificationAdapter.class);
