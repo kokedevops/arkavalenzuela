@@ -1,51 +1,159 @@
-# 🚀 ARKA VALENZUELA E-COMMERCE - GUÍA COMPLETA DE TESTING
+# 🚀 ARKA E-COMMERCE - GUÍA COMPLETA DE TESTING
 
-## 📋 **ÍNDICE**
+<div align="center">
+  <img src="https://img.shields.io/badge/Testing-Complete-success" alt="Testing"/>
+  <img src="https://img.shields.io/badge/APIs-REST-blue" alt="REST APIs"/>
+  <img src="https://img.shields.io/badge/Authentication-JWT-orange" alt="JWT"/>
+  <img src="https://img.shields.io/badge/Environment-Production-red" alt="Production"/>
+</div>
+
+---
+
+## 📋 **ÍNDICE COMPLETO**
 - [🌐 Información General](#-información-general)
 - [🔑 Autenticación JWT](#-autenticación-jwt)
 - [🛒 API E-commerce Principal](#-api-e-commerce-principal)
 - [🌍 API de Terceros](#-api-de-terceros)
 - [🔧 Microservicios](#-microservicios)
-- [📱 BFF (Backend for Frontend)](#-bff-backend-for-frontend)
-- [🧪 Testing Completo](#-testing-completo)
+- [📱 BFF Architecture](#-bff-architecture)
+- [🧪 Testing Automatizado](#-testing-automatizado)
+- [📊 Monitoring & Health](#-monitoring--health)
+- [🎯 Test Scenarios](#-test-scenarios)
+- [🛠️ Troubleshooting](#️-troubleshooting)
 
 ---
 
 ## 🌐 **INFORMACIÓN GENERAL**
 
-### **URL Base**
-```
+### 🏠 **URLs Base**
+```bash
+# 🛒 E-commerce Principal (Local)
+http://localhost:8888
+
+# 🌐 API Gateway (Local)
+http://localhost:8080
+
+# ☁️ Production Server (AWS)
 http://3.134.244.104:8888
+
+# 🔍 Service Discovery
+http://localhost:8761
 ```
 
-### **Información de la API**
+### 📊 **Información de la API**
 ```bash
-GET http://3.134.244.104:8888/
+# Información general del sistema
+GET http://localhost:8888/
+
+# Health check principal
+GET http://localhost:8888/health
+
+# Info detallada de la aplicación
+GET http://localhost:8888/actuator/info
+
+# Métricas del sistema
+GET http://localhost:8888/actuator/metrics
 ```
 
-### **Health Check**
+### 🎯 **Endpoints de Documentación**
 ```bash
-GET http://3.134.244.104:8888/health
+# OpenAPI/Swagger Documentation
+GET http://localhost:8888/v3/api-docs
+
+# Swagger UI
+GET http://localhost:8888/swagger-ui.html
+
+# Actuator endpoints disponibles
+GET http://localhost:8888/actuator
 ```
 
 ---
 
 ## 🔑 **AUTENTICACIÓN JWT**
 
-### **1. Información de Usuarios Demo**
+### 👥 **Usuarios Demo**
 ```bash
-GET http://3.134.244.104:8888/api/auth/demo-users
+# Obtener información de usuarios de prueba
+GET http://localhost:8888/api/auth/demo-users
+
+# Response esperado:
+{
+  "demoUsers": [
+    {
+      "username": "admin",
+      "password": "admin123",
+      "roles": ["ADMIN", "USER"],
+      "description": "Usuario administrador"
+    },
+    {
+      "username": "user",
+      "password": "user123",
+      "roles": ["USER"],
+      "description": "Usuario estándar"
+    },
+    {
+      "username": "manager",
+      "password": "manager123",
+      "roles": ["MANAGER", "USER"],
+      "description": "Usuario gerente"
+    }
+  ]
+}
 ```
 
-### **2. Login JWT**
+### 🔐 **Login Process**
 ```bash
-POST http://3.134.244.104:8888/api/auth/login
+# Login con username/email
+POST http://localhost:8888/api/auth/login
 Content-Type: application/json
 
 {
   "identifier": "admin",
   "password": "admin123"
 }
+
+# Response:
+{
+  "success": true,
+  "message": "Login exitoso",
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+  "user": {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@arka.com",
+    "roles": ["ADMIN", "USER"]
+  },
+  "expiresIn": 86400000
+}
+```
+
+### 🔄 **Token Management**
+```bash
+# Refresh Token
+POST http://localhost:8888/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "your-refresh-token-here"
+}
+
+# Logout
+POST http://localhost:8888/api/auth/logout
+Authorization: Bearer {JWT_TOKEN}
+
+# Validate Token
+GET http://localhost:8888/api/auth/validate
+Authorization: Bearer {JWT_TOKEN}
+```
+
+### 🔒 **Security Headers**
+```bash
+# Template para requests autenticados
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
+Content-Type: application/json
+Accept: application/json
+X-Requested-With: XMLHttpRequest
 ```
 
 **Respuesta esperada:**

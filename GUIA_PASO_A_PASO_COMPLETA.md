@@ -1,52 +1,116 @@
-# 📚 PROYECTO ARKA - GUÍA COMPLETA PASO A PASO
+# 🚀 ARKA E-COMMERCE - GUÍA COMPLETA PASO A PASO
+
+<div align="center">
+  <img src="https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen" alt="Spring Boot"/>
+  <img src="https://img.shields.io/badge/Java-17+-orange" alt="Java"/>
+  <img src="https://img.shields.io/badge/Architecture-Hexagonal%20%2B%20DDD-blue" alt="Architecture"/>
+  <img src="https://img.shields.io/badge/Docker-Containerized-blue" alt="Docker"/>
+  <img src="https://img.shields.io/badge/AWS-Cloud%20Ready-yellow" alt="AWS"/>
+</div>
+
+---
 
 ## 🎉 **ACTUALIZACIÓN MAYOR: E-COMMERCE 100% COMPLETO**
 
 ### ✅ **NUEVAS FUNCIONALIDADES IMPLEMENTADAS**
-- 🛒 **E-commerce APIs completas** (Carritos + Pedidos)
-- 📱💻 **BFF Architecture** (Mobile + Web)
-- 🔔 **Sistema de notificaciones automáticas**
-- 📧 **SMTP real** con JavaMailSender
-- 🍃 **MongoDB** para analytics y logs
-- 📊 **Business Intelligence** completo
-- 🐳 **Docker Compose** con toda la infraestructura
+- 🛒 **E-commerce APIs completas** (Carritos + Pedidos + Productos + Clientes)
+- 📱💻 **BFF Architecture** (Backend For Frontend - Mobile + Web)
+- 🔔 **Sistema de notificaciones automáticas** con eventos
+- 📧 **SMTP real** con JavaMailSender y templates
+- 🍃 **MongoDB** para analytics, logs y datos no relacionales
+- 📊 **Business Intelligence** completo con métricas
+- 🐳 **Docker Compose** con toda la infraestructura lista
+- 🔐 **JWT Security** con refresh tokens y autorización
+- ⚡ **Programación reactiva** con WebFlux y R2DBC
+- 🌐 **Service Discovery** con Eureka y Load Balancing
+- 🔄 **Circuit Breakers** con Resilience4j
+- 📈 **Monitoring** con Actuator y métricas custom
 
 ### 🚀 **INICIO RÁPIDO**
 ```bash
-# Windows
+# Windows - E-commerce Completo
 scripts\start-ecommerce-complete.bat
 
-# Linux/Mac  
+# Linux/Mac - E-commerce Completo
 ./scripts/start-ecommerce-complete.sh
+
+# Verificar servicios
+./scripts/check-services.sh
 ```
 
-**URLs principales:**
-- 🛒 E-commerce: http://localhost:8080
-- 🍃 MongoDB: http://localhost:8081  
-- 📧 Email Testing: http://localhost:8025
+**🌐 URLs principales:**
+- 🛒 **E-commerce API**: http://localhost:8888
+- 🌐 **API Gateway**: http://localhost:8080
+- 🔍 **Eureka Server**: http://localhost:8761
+- 🍃 **MongoDB Express**: http://localhost:8081
+- 📧 **MailHog UI**: http://localhost:8025
+- 📊 **Prometheus**: http://localhost:9090
+- 📈 **Grafana**: http://localhost:3000
 
 ---
 
-## 📋 Índice
+## 📋 **ÍNDICE COMPLETO**
 
-1. [🏗️ Arquitectura General](#arquitectura-general)
-2. [🎯 Microservicios Implementados](#microservicios-implementados)
-3. [🔐 Seguridad y Autenticación](#seguridad-y-autenticación)
-4. [⚡ Programación Reactiva](#programación-reactiva)
-5. [🌐 Spring Cloud y Service Discovery](#spring-cloud-y-service-discovery)
-6. [🔄 Circuit Breakers y Resilencia](#circuit-breakers-y-resilencia)
-7. [🐳 Containerización con Docker](#containerización-con-docker)
-8. [☁️ Infraestructura AWS](#infraestructura-aws)
-9. [🧪 Testing Estrategias](#testing-estrategias)
-10. [🚀 Despliegue y Operaciones](#despliegue-y-operaciones)
+- [🏗️ Arquitectura General](#️-arquitectura-general)
+- [🎯 Microservicios Implementados](#-microservicios-implementados)
+- [🔐 Seguridad JWT](#-seguridad-jwt)
+- [⚡ Programación Reactiva](#-programación-reactiva)
+- [🌐 Spring Cloud](#-spring-cloud)
+- [🔄 Circuit Breakers](#-circuit-breakers)
+- [🐳 Docker & Containerización](#-docker--containerización)
+- [☁️ AWS Infrastructure](#️-aws-infrastructure)
+- [🧪 Testing Completo](#-testing-completo)
+- [🚀 Deployment](#-deployment)
+- [📊 Monitoring & Observability](#-monitoring--observability)
+- [📚 APIs Documentation](#-apis-documentation)
+- [🛠️ Troubleshooting](#️-troubleshooting)
 
 ---
 
-## 🏗️ Arquitectura General
+## 🏗️ **ARQUITECTURA GENERAL**
 
-### Patrón Arquitectónico: Arquitectura Hexagonal + DDD
+### 📐 **Patrón Arquitectónico: Hexagonal + DDD + Microservices**
 
-El proyecto ARKA implementa una **Arquitectura Hexagonal** (Ports & Adapters) combinada con **Domain-Driven Design (DDD)**:
+La plataforma ARKA implementa una **Arquitectura Hexagonal** (Ports & Adapters) combinada con **Domain-Driven Design (DDD)** y **Microservices Pattern**:
+
+```mermaid
+graph TD
+    A[Web Frontend] -->|HTTP/REST| B[API Gateway]
+    C[Mobile App] -->|HTTP/REST| B
+    B --> D[Authentication Service]
+    B --> E[Product Service]
+    B --> F[Order Service]
+    B --> G[Customer Service]
+    B --> H[Cart Service]
+    B --> I[BFF Web Service]
+    B --> J[BFF Mobile Service]
+    
+    D --> K[MySQL Database]
+    E --> K
+    F --> K
+    G --> K
+    H --> L[MongoDB]
+    I --> K
+    J --> L
+    
+    M[Eureka Discovery] --> B
+    M --> D
+    M --> E
+    M --> F
+    M --> G
+    M --> H
+    M --> I
+    M --> J
+    
+    N[Config Server] --> B
+    N --> D
+    N --> E
+    N --> F
+    N --> G
+    N --> H
+    N --> I
+    N --> J
+```
 
 ```
 ┌─────────────────────────────────────────────────────────────┐

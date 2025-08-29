@@ -1,52 +1,152 @@
-# 🚀 GUÍA DE EJECUCIÓN COMPLETA - PROYECTO ARKA
+# 🚀 GUÍA DE EJECUCIÓN COMPLETA - ARKA E-COMMERCE
 
-## 📋 Requisitos Previos
+<div align="center">
+  <img src="https://img.shields.io/badge/Deployment-Production%20Ready-success" alt="Deployment"/>
+  <img src="https://img.shields.io/badge/Docker-Required-blue" alt="Docker"/>
+  <img src="https://img.shields.io/badge/Java-21+-orange" alt="Java"/>
+  <img src="https://img.shields.io/badge/Environment-Multi--Platform-purple" alt="Multi-Platform"/>
+</div>
 
-### Instalaciones Necesarias
+---
+
+## 📋 **PREREQUISITOS DEL SISTEMA**
+
+### 🎯 **Instalaciones Obligatorias**
 ```bash
-# Java 21 (obligatorio)
-java --version  # Debe mostrar Java 21
+# ☕ Java 21+ (OBLIGATORIO)
+java --version
+# Esperado: openjdk 21.0.x o superior
 
-# Docker Desktop
-docker --version
-docker-compose --version
+# 🐳 Docker Desktop (OBLIGATORIO)
+docker --version && docker-compose --version
+# Esperado: Docker 20.x+ y Docker Compose 2.x+
 
-# Git
+# 📦 Git (OBLIGATORIO)
 git --version
+# Esperado: git 2.x+
 
-# MySQL (opcional - se puede usar Docker)
-mysql --version
+# 🔨 Gradle (Incluido en proyecto)
+./gradlew --version  # Linux/Mac
+.\gradlew.bat --version  # Windows
 ```
 
-### Variables de Entorno
-```bash
-# Windows PowerShell
+### 📊 **Recursos del Sistema**
+- **RAM**: Mínimo 8GB (Recomendado 16GB+)
+- **Disco**: 10GB libres
+- **CPU**: 4 cores (Recomendado 8+)
+- **Puertos**: 8080, 8888, 8761, 3306, 27017, 8025, 9090, 3000
+
+### 🌐 **Variables de Entorno**
+
+#### **Windows PowerShell**
+```powershell
+# Configuración de Java
 $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+
+# Configuración de Base de Datos
 $env:MYSQL_ROOT_PASSWORD = "rootpassword"
 $env:MYSQL_DATABASE = "arkadb"
+$env:MYSQL_USER = "arkauser"
+$env:MYSQL_PASSWORD = "arkapass"
+
+# Configuración de Seguridad
 $env:JWT_SECRET = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+$env:JWT_EXPIRATION = "86400000"  # 24 horas
+
+# Configuración de Microservicios
+$env:EUREKA_URL = "http://localhost:8761/eureka"
+$env:CONFIG_SERVER_URL = "http://localhost:8888"
 ```
 
-## 🏗️ PREPARACIÓN DEL ENTORNO
-
-### 1. Clonar y Configurar el Repositorio
+#### **Linux/Mac Bash**
 ```bash
-# Clonar el proyecto
+# Configuración de Java
+export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# Configuración de Base de Datos
+export MYSQL_ROOT_PASSWORD="rootpassword"
+export MYSQL_DATABASE="arkadb"
+export MYSQL_USER="arkauser"
+export MYSQL_PASSWORD="arkapass"
+
+# Configuración de Seguridad
+export JWT_SECRET="404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+export JWT_EXPIRATION="86400000"
+
+# Configuración de Microservicios
+export EUREKA_URL="http://localhost:8761/eureka"
+export CONFIG_SERVER_URL="http://localhost:8888"
+```
+
+---
+
+## 🏗️ **PREPARACIÓN DEL ENTORNO**
+
+### 1️⃣ **Clonar y Configurar el Repositorio**
+```bash
+# 📥 Clonar el proyecto
 git clone https://github.com/kokedevops/arkavalenzuela.git
 cd arkavalenzuela
 
-# Verificar estructura
-dir  # Windows
-ls   # Linux/Mac
-```
-
-### 2. Compilar Todo el Proyecto
-```bash
+# 🔍 Verificar estructura del proyecto
 # Windows
-.\gradlew.bat clean build
+dir
+Get-ChildItem -Recurse -Directory | Select-Object Name
 
 # Linux/Mac
-./gradlew clean build
+ls -la
+find . -type d -name "*" | head -20
+
+# ✅ Verificar archivos clave
+ls -la *.md       # Documentación
+ls -la scripts/   # Scripts de automatización
+ls -la docker-compose.yml  # Configuración Docker
+```
+
+### 2️⃣ **Compilar Proyecto Completo**
+```bash
+# 🧹 Limpiar y compilar todo
+# Windows
+.\gradlew.bat clean build --parallel --info
+
+# Linux/Mac
+./gradlew clean build --parallel --info
+
+# 🎯 Compilar módulos específicos
+./gradlew :api-gateway:build
+./gradlew :eureka-server:build
+./gradlew :arca-cotizador:build
+./gradlew :arca-gestor-solicitudes:build
+./gradlew :hello-world-service:build
+
+# ✅ Verificar compilación exitosa
+echo "✅ Build completed successfully!"
+```
+
+### 3️⃣ **Configurar Base de Datos**
+```bash
+# 🐳 Opción 1: Docker (Recomendado)
+docker run --name mysql-arka \
+  -e MYSQL_ROOT_PASSWORD=rootpassword \
+  -e MYSQL_DATABASE=arkadb \
+  -e MYSQL_USER=arkauser \
+  -e MYSQL_PASSWORD=arkapass \
+  -p 3306:3306 \
+  -d mysql:8.0
+
+# 🍃 MongoDB para Analytics
+docker run --name mongo-arka \
+  -e MONGO_INITDB_ROOT_USERNAME=root \
+  -e MONGO_INITDB_ROOT_PASSWORD=rootpassword \
+  -e MONGO_INITDB_DATABASE=arkaanalytics \
+  -p 27017:27017 \
+  -d mongo:7
+
+# ✅ Verificar conexiones
+docker exec mysql-arka mysql -u root -prootpassword -e "SHOW DATABASES;"
+docker exec mongo-arka mongosh --eval "db.adminCommand('listDatabases')"
 ```
 
 ### 3. Configurar Base de Datos

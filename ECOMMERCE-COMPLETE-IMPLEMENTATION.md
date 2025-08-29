@@ -1,32 +1,109 @@
-# 🛒 ARKA VALENZUELA - E-COMMERCE COMPLETO
+# 🛒 ARKA E-COMMERCE - IMPLEMENTACIÓN COMPLETA
 
-## 🎉 **NUEVAS FUNCIONALIDADES IMPLEMENTADAS**
+<div align="center">
+  <img src="https://img.shields.io/badge/E--commerce-Complete-success" alt="E-commerce"/>
+  <img src="https://img.shields.io/badge/APIs-REST-blue" alt="REST APIs"/>
+  <img src="https://img.shields.io/badge/Notifications-Real--time-orange" alt="Notifications"/>
+  <img src="https://img.shields.io/badge/BFF-Architecture-purple" alt="BFF"/>
+</div>
+
+---
+
+## 🎉 **IMPLEMENTACIÓN E-COMMERCE COMPLETA**
+
+### 📋 **ÍNDICE**
+- [🛒 APIs E-commerce](#-apis-e-commerce)
+- [🔔 Sistema de Notificaciones](#-sistema-de-notificaciones)
+- [📱💻 BFF Architecture](#-bff-architecture)
+- [📧 Email System](#-email-system)
+- [🍃 MongoDB Integration](#-mongodb-integration)
+- [📊 Business Intelligence](#-business-intelligence)
+- [🧪 Testing](#-testing)
+
+---
+
+## 🛒 **APIS E-COMMERCE**
 
 ### ✅ **CONTROLADORES REST COMPLETOS**
 
 #### 🛒 **CartController** - `/carritos`
-- `GET /carritos` - Listar todos los carritos
-- `GET /carritos/{id}` - Obtener carrito por ID
-- `POST /carritos` - Crear nuevo carrito
-- `PUT /carritos/{id}` - Actualizar carrito
-- `DELETE /carritos/{id}` - Eliminar carrito
-- `GET /carritos/abandonados` - 🎯 **Carritos abandonados**
-- `PUT /carritos/{id}/activar` - Activar carrito
-- `PUT /carritos/{id}/abandonar` - Abandonar carrito
+```http
+GET    /carritos                    # Listar todos los carritos
+GET    /carritos/{id}               # Obtener carrito por ID
+POST   /carritos                    # Crear nuevo carrito
+PUT    /carritos/{id}               # Actualizar carrito
+DELETE /carritos/{id}               # Eliminar carrito
+GET    /carritos/abandonados        # 🎯 Carritos abandonados
+PUT    /carritos/{id}/activar       # Activar carrito
+PUT    /carritos/{id}/abandonar     # Abandonar carrito
+```
+
+**Ejemplo - Crear Carrito:**
+```json
+POST /carritos
+{
+  "customerId": 1,
+  "productIds": [1, 2, 3],
+  "estado": "ACTIVO",
+  "total": 299.99
+}
+```
 
 #### 📋 **OrderController** - `/pedidos`
-- `GET /pedidos` - Listar todos los pedidos
-- `GET /pedidos/{id}` - Obtener pedido por ID
-- `POST /pedidos` - Crear nuevo pedido
-- `PUT /pedidos/{id}` - Actualizar pedido
-- `DELETE /pedidos/{id}` - Eliminar pedido
-- `GET /pedidos/cliente/{customerId}` - Pedidos por cliente
-- `GET /pedidos/producto/{productId}` - Pedidos por producto
-- `GET /pedidos/rango-fechas` - Pedidos por rango de fechas
+```http
+GET    /pedidos                          # Listar todos los pedidos
+GET    /pedidos/{id}                     # Obtener pedido por ID
+POST   /pedidos                          # Crear nuevo pedido
+PUT    /pedidos/{id}                     # Actualizar pedido
+DELETE /pedidos/{id}                     # Eliminar pedido
+GET    /pedidos/cliente/{customerId}     # Pedidos por cliente
+GET    /pedidos/producto/{productId}     # Pedidos por producto
+GET    /pedidos/rango-fechas             # Pedidos por rango de fechas
+PUT    /pedidos/{id}/estado              # Cambiar estado del pedido
+```
 
----
+**Ejemplo - Crear Pedido:**
+```json
+POST /pedidos
+{
+  "customerId": 1,
+  "productIds": [1, 2],
+  "total": 599.98,
+  "estado": "PENDIENTE",
+  "direccionEntrega": "Av. Principal 123, Santiago"
+}
+```
 
-### 🔔 **SISTEMA DE NOTIFICACIONES**
+#### 📦 **ProductController** - `/productos`
+```http
+GET    /productos                   # Listar productos
+GET    /productos/{id}              # Producto por ID
+POST   /productos                   # Crear producto
+PUT    /productos/{id}              # Actualizar producto
+DELETE /productos/{id}              # Eliminar producto
+GET    /productos/categoria/{id}    # Productos por categoría
+GET    /productos/buscar            # Buscar productos
+GET    /productos/stock-bajo        # Productos con stock bajo
+```
+
+#### � **CustomerController** - `/usuarios`
+```http
+GET    /usuarios                    # Listar clientes
+GET    /usuarios/{id}               # Cliente por ID
+POST   /usuarios                    # Crear cliente
+PUT    /usuarios/{id}               # Actualizar cliente
+DELETE /usuarios/{id}               # Eliminar cliente
+GET    /usuarios/email/{email}      # Cliente por email
+```
+
+#### 🏷️ **CategoryController** - `/categorias`
+```http
+GET    /categorias                  # Listar categorías
+GET    /categorias/{id}             # Categoría por ID
+POST   /categorias                  # Crear categoría
+PUT    /categorias/{id}             # Actualizar categoría
+DELETE /categorias/{id}             # Eliminar categoría
+```
 
 #### 📧 **EmailNotificationAdapter**
 - ✅ **Notificaciones de carritos abandonados**

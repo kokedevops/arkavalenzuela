@@ -1,25 +1,65 @@
-# 🏢 ARKA VALENZUELA - SISTEMA DE MICROSERVICIOS E-COMMERCE
+# 🏢 ARKA VALENZUELA - PLATAFORMA E-COMMERCE MICROSERVICIOS
 
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2023.0.1-blue.svg)](https://spring.io/projects/spring-cloud)
-[![WebFlux](https://img.shields.io/badge/Spring%20WebFlux-Reactive-purple.svg)](https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html)
-[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://docs.docker.com/compose/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<div align="center">
+  <img src="https://img.shields.io/badge/Spring%20Boot-3.2.3-brightgreen" alt="Spring Boot"/>
+  <img src="https://img.shields.io/badge/Java-21-orange" alt="Java"/>
+  <img src="https://img.shields.io/badge/Docker-Enabled-blue" alt="Docker"/>
+  <img src="https://img.shields.io/badge/Architecture-Hexagonal-orange" alt="Hexagonal"/>
+  <img src="https://img.shields.io/badge/Security-JWT-red" alt="JWT"/>
+  <img src="https://img.shields.io/badge/Cloud-AWS%20Ready-yellow" alt="AWS"/>
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT"/>
+</div>
 
-> **Plataforma completa de microservicios para e-commerce con arquitectura reactiva, Spring Cloud, Docker y funcionalidades avanzadas de notificaciones, analytics y BFF.**
+---
+
+## 📋 **ÍNDICE DE DOCUMENTACIÓN**
+
+### 📚 **Documentación Esencial**
+| Documento | Descripción | Uso |
+|-----------|-------------|-----|
+| **[🚀 Inicio Rápido](QUICK-START-GUIDE.md)** | Levanta el proyecto en 5 minutos | Desarrollo |
+| **[📖 Guía Completa](GUIA_PASO_A_PASO_COMPLETA.md)** | Documentación técnica detallada | Desarrollo |
+| **[🐳 Despliegue Docker](DOCKER-DEPLOYMENT-GUIDE.md)** | Containerización completa | DevOps |
+
+### 🧪 **Testing y APIs**
+| Documento | Descripción | Uso |
+|-----------|-------------|-----|
+| **[🔍 API Testing](API-ENDPOINTS-TESTING.md)** | Todos los endpoints con ejemplos | Testing |
+| **[📮 Postman Guide](POSTMAN-GUIA-COMPLETA.md)** | Colección completa de Postman | Testing |
+| **[✅ Testing Guide](GUIA-PRUEBAS-COMPLETA.md)** | Tests unitarios e integración | QA |
+
+### 🛠️ **Operaciones**
+| Documento | Descripción | Uso |
+|-----------|-------------|-----|
+| **[⚙️ Scripts](scripts/README.md)** | Automatización completa | DevOps |
+| **[🏃 Ejecución](GUIA_EJECUCION_COMPLETA.md)** | Comandos y operaciones | Desarrollo |
+
+---
+
+## 🎯 **RESUMEN EJECUTIVO**
+
+**ARKA Valenzuela** es una **plataforma e-commerce empresarial** construida con **arquitectura de microservicios**, implementando patrones modernos de desarrollo, seguridad robusta y tecnologías cloud-native para máxima escalabilidad y mantenibilidad.
+
+### 🏆 **Cumplimiento Académico**
+✅ **Arquitectura Hexagonal + DDD** - Separación clara de responsabilidades  
+✅ **Programación Reactiva** - WebFlux con Mono/Flux  
+✅ **Spring Cloud** - Eureka, Gateway, Config, Circuit Breakers  
+✅ **Docker** - Containerización completa con Docker Compose  
+✅ **Spring Security + JWT** - Autenticación y autorización robusta  
+✅ **API de Terceros** - Endpoints CRUD según especificaciones  
+✅ **Testing** - Pruebas unitarias, integración y API  
 
 ---
 
 ## 🚀 **CARACTERÍSTICAS PRINCIPALES**
 
-### 🎯 **Arquitectura de Microservicios**
-- ✅ **API Gateway** con balanceador de carga
-- ✅ **Eureka Server** para descubrimiento de servicios
-- ✅ **Spring Cloud Config** para configuración centralizada
-- ✅ **Arquitectura Hexagonal** (Ports & Adapters)
-- ✅ **Programación Reactiva** con WebFlux
-- ✅ **Seguridad JWT** con OAuth2
+### 🎯 **Tecnologías Core**
+- ✅ **Spring Boot 3.2.3** - Framework principal
+- ✅ **Spring WebFlux** - Programación reactiva
+- ✅ **Spring Cloud** - Microservicios y service discovery
+- ✅ **Spring Security + JWT** - Autenticación y autorización
+- ✅ **Arquitectura Hexagonal** - Clean Architecture
+- ✅ **Domain-Driven Design** - Modelado del dominio
 
 ### 🛒 **Funcionalidades E-Commerce**
 - 🛍️ **Gestión de productos** y categorías
@@ -331,14 +371,25 @@ Authorization: Bearer <jwt_token>
 
 ---
 
-## 📚 **DOCUMENTACIÓN**
+## 📚 **DOCUMENTACIÓN COMPLETA**
 
-| Archivo | Descripción |
-|---------|-------------|
-| [`ECOMMERCE-COMPLETE-IMPLEMENTATION.md`](ECOMMERCE-COMPLETE-IMPLEMENTATION.md) | Funcionalidades completas del e-commerce |
-| [`GUIA_PASO_A_PASO_COMPLETA.md`](GUIA_PASO_A_PASO_COMPLETA.md) | Guía paso a paso completa |
-| [`QUICK-START-GUIDE.md`](QUICK-START-GUIDE.md) | Guía de inicio rápido |
-| [`GUIA_EJECUCION_COMPLETA.md`](GUIA_EJECUCION_COMPLETA.md) | Guía completa de ejecución |
+### 📋 **Navegación Rápida**
+- **[📚 ÍNDICE MAESTRO](DOCUMENTATION-INDEX.md)** - Toda la documentación organizada
+- **[⚡ Quick Start](QUICK-START-GUIDE.md)** - Inicio en 5 minutos
+- **[📝 API Testing](API-ENDPOINTS-TESTING.md)** - Testing completo de endpoints
+- **[📮 Postman Guide](POSTMAN-GUIA-COMPLETA.md)** - Colección completa
+- **[🐳 Docker Guide](DOCKER-DEPLOYMENT-GUIDE.md)** - Containerización
+- **[🛠️ Scripts](scripts/README.md)** - Automatización y deployment
+
+### 📖 **Documentación Detallada**
+
+| Archivo | Descripción | Audiencia |
+|---------|-------------|-----------|
+| **[📚 ÍNDICE MAESTRO](DOCUMENTATION-INDEX.md)** | Navegación completa de toda la documentación | Todos |
+| **[🛒 E-commerce Implementation](ECOMMERCE-COMPLETE-IMPLEMENTATION.md)** | Funcionalidades completas del e-commerce | Desarrolladores |
+| **[📚 Guía Paso a Paso](GUIA_PASO_A_PASO_COMPLETA.md)** | Tutorial técnico completo | Desarrollo |
+| **[🚀 Guía de Ejecución](GUIA_EJECUCION_COMPLETA.md)** | Deployment en producción | DevOps |
+| **[🧪 Testing Completo](README-TESTING-COMPLETO.md)** | Validación y testing | QA/Testing |
 
 ---
 
