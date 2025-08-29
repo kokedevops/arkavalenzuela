@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .requestMatchers("/api", "/api/info").permitAll() // Información de la API
                 .requestMatchers("/api/auth/**").permitAll() // Endpoints de autenticación públicos
                 .requestMatchers("/api/public/**").permitAll() // Endpoints públicos
+                .requestMatchers("/api/terceros/**").permitAll() // API de terceros pública
                 .requestMatchers("/api/products/**").permitAll() // Catálogo de productos público
                 .requestMatchers("/api/categories/**").permitAll() // Categorías públicas
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
