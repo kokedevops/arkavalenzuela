@@ -13,6 +13,9 @@ start_service() {
     echo "Starting $service_name (Port $port)..."
     echo "=========================================="
     
+    # Convert service name to lowercase for log filename
+    local log_filename=$(echo "$service_name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+    
     # Start service in background with logs
     cd "$(dirname "$0")/.."
     gnome-terminal --title="$service_name" --tab -- bash -c "./gradlew $gradle_task; exec bash" 2>/dev/null || \
@@ -20,8 +23,8 @@ start_service() {
     konsole --title "$service_name" -e bash -c "./gradlew $gradle_task; exec bash" 2>/dev/null || \
     {
         echo "No suitable terminal found. Starting in background..."
-        nohup ./gradlew $gradle_task > logs/${service_name,,}.log 2>&1 &
-        echo "Logs available at: logs/${service_name,,}.log"
+        nohup ./gradlew $gradle_task > "logs/$log_filename.log" 2>&1 &
+        echo "Logs available at: logs/$log_filename.log"
     }
 }
 
