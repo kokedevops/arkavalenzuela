@@ -24,28 +24,51 @@ services:
       retries: 3
       start_period: 60s
 
-  config-server:
+  # =================================
+  # Main Application
+  # =================================
+  
+  main-app:
     build:
-      context: ./config-server
+      context: .
       dockerfile: Dockerfile
-    container_name: arka-config-server
+    container_name: arka-main-app
     ports:
-      - "9090:9090"
+      - "8888:8888"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SERVER_PORT=9090
+      - SERVER_PORT=8888
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=arka
+      - SPRING_RABBITMQ_PASSWORD=arka123
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/arka_db
+      - SPRING_DATASOURCE_USERNAME=arka
+      - SPRING_DATASOURCE_PASSWORD=arka123
+      - SPRING_DATA_MONGODB_URI=mongodb://arka_admin:Arca2025*@mongodb:27017/arka_notifications?authSource=admin
+      - ARKA_SECURITY_JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - ARKA_SECURITY_JWT_EXPIRATION=86400
+      - ARKA_SECURITY_JWT_REFRESH_EXPIRATION=604800
     depends_on:
       eureka-server:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
     networks:
       - arka-network
+    volumes:
+      - main-app-data:/app/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 120s
 
   # =================================
   # Message Broker
@@ -86,11 +109,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SERVER_PORT=8080
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:9090
     depends_on:
       eureka-server:
-        condition: service_healthy
-      config-server:
         condition: service_healthy
     networks:
       - arka-network
@@ -116,7 +136,6 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SERVER_PORT=8082
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:9090
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=arka
@@ -127,8 +146,6 @@ services:
       - ARKA_SECURITY_JWT_REFRESH_EXPIRATION=604800
     depends_on:
       eureka-server:
-        condition: service_healthy
-      config-server:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -154,7 +171,6 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SERVER_PORT=8083
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:9090
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=arka
@@ -162,8 +178,6 @@ services:
       - SPRING_R2DBC_URL=r2dbc:h2:mem:///cotizador_db?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     depends_on:
       eureka-server:
-        condition: service_healthy
-      config-server:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -189,11 +203,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SERVER_PORT=8084
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_CLOUD_CONFIG_URI=http://config-server:9090
     depends_on:
       eureka-server:
-        condition: service_healthy
-      config-server:
         condition: service_healthy
     networks:
       - arka-network
@@ -352,6 +363,8 @@ networks:
 
 volumes:
   rabbitmq-data:
+    driver: local
+  main-app-data:
     driver: local
   gestor-data:
     driver: local
