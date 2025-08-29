@@ -2,6 +2,8 @@ package com.arka.arkavalenzuela.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -25,7 +27,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Deshabilitamos CSRF para APIs REST
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/", "/error").permitAll() // Página de inicio y errores públicos
+                .requestMatchers("/", "/error", "/login").permitAll() // Página de inicio, errores y login públicos
                 .requestMatchers("/health", "/actuator/**").permitAll() // Health checks
                 .requestMatchers("/api", "/api/info").permitAll() // Información de la API
                 .requestMatchers("/api/auth/**").permitAll() // Endpoints de autenticación públicos
@@ -77,5 +79,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12); // Strength 12 para mayor seguridad
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }

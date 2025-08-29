@@ -74,6 +74,34 @@ public class HomeController {
     }
 
     /**
+     * Información de login
+     */
+    @GetMapping("/login")
+    public ResponseEntity<Map<String, Object>> loginInfo() {
+        Map<String, Object> response = new HashMap<>();
+        
+        response.put("message", "Login Information");
+        response.put("endpoint", "POST /api/auth/login");
+        response.put("method", "JSON POST or HTTP Basic Auth");
+        
+        Map<String, Object> jsonExample = new HashMap<>();
+        jsonExample.put("identifier", "admin");
+        jsonExample.put("password", "admin123");
+        
+        response.put("jsonExample", jsonExample);
+        response.put("basicAuthExample", "Authorization: Basic YWRtaW46YWRtaW4xMjM=");
+        
+        Map<String, String> users = new HashMap<>();
+        users.put("admin", "admin123 (ADMIN, USER roles)");
+        users.put("user", "user123 (USER role)");
+        users.put("demo", "demo123 (USER role)");
+        
+        response.put("availableUsers", users);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Información de la API
      */
     @GetMapping("/api")
