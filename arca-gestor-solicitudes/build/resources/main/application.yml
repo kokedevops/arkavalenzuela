@@ -1,0 +1,123 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: arca-gestor-solicitudes
+  webflux:
+    base-path: /
+    webclient:
+      max-in-memory-size: 1MB
+  r2dbc:
+    url: r2dbc:h2:mem:///gestor_db?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+  h2:
+    console:
+      enabled: true
+  cloud:
+    stream:
+      bindings:
+        envio-events:
+          destination: envio-topic
+          contentType: application/json
+          producer:
+            partitionKeyExpression: headers.calculoId
+        circuit-breaker-events:
+          destination: circuit-breaker-topic
+          contentType: application/json
+        metricas-events:
+          destination: metricas-topic
+          contentType: application/json
+      rabbit:
+        bindings:
+          envio-events:
+            producer:
+              routingKeyExpression: headers.estado
+          circuit-breaker-events:
+            producer:
+              routingKeyExpression: headers.servicio
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+
+# Configuración de Arka
+arka:
+  cli:
+    enabled: ${ARKA_CLI_ENABLED:false}
+  security:
+    jwt:
+      secret: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+      expiration: 86400  # 24 horas en segundos
+      refresh-expiration: 604800 # 7 días en segundos
+
+# Configuración AWS
+aws:
+  region: ${AWS_REGION:us-east-1}
+  s3:
+    bucket-name: ${AWS_S3_BUCKET:arka-envios-bucket}
+  sqs:
+    queue-url: ${AWS_SQS_QUEUE_URL:https://sqs.us-east-1.amazonaws.com/123456789/arka-envios-queue}
+  credentials:
+    access-key: ${AWS_ACCESS_KEY:}
+    secret-key: ${AWS_SECRET_KEY:}
+
+# Configuración de Resilience4j Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      calculo-envio-service:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.reactive.function.client.WebClientException
+      proveedor-externo-service:
+        registerHealthIndicator: true
+        slidingWindowSize: 8
+        minimumNumberOfCalls: 3
+        permittedNumberOfCallsInHalfOpenState: 2
+        waitDurationInOpenState: 15s
+        failureRateThreshold: 60
+        eventConsumerBufferSize: 10
+  retry:
+    instances:
+      calculo-envio-service:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+  timeout:
+    instances:
+      calculo-envio-service:
+        timeoutDuration: 5s
+
+logging:
+  level:
+    com.arka.gestorsolicitudes: DEBUG
+    reactor.netty: INFO
