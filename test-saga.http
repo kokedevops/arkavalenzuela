@@ -1,0 +1,65 @@
+# Test del Patrón Saga - Arka Valenzuela
+
+## Endpoint para iniciar Saga
+POST http://localhost:8888/api/saga/start
+Content-Type: application/json
+
+{
+  "pedidoId": "PEDIDO_001", 
+  "clienteId": "CLIENTE_123",
+  "productoId": "PRODUCTO_ABC",
+  "cantidad": 2,
+  "precio": 150.00
+}
+
+### Test casos exitosos
+
+# Caso 1: Pedido exitoso (no contiene 999, 888, 777)
+POST http://localhost:8888/api/saga/start
+Content-Type: application/json
+
+{
+  "pedidoId": "PEDIDO_SUCCESS_001", 
+  "clienteId": "CLIENTE_123",
+  "productoId": "PRODUCTO_ABC",
+  "cantidad": 2,
+  "precio": 150.00
+}
+
+### Test casos de error
+
+# Caso 2: Error en inventario (contiene 999)
+POST http://localhost:8888/api/saga/start
+Content-Type: application/json
+
+{
+  "pedidoId": "PEDIDO_999_ERROR", 
+  "clienteId": "CLIENTE_123",
+  "productoId": "PRODUCTO_999",
+  "cantidad": 2,
+  "precio": 150.00
+}
+
+# Caso 3: Error en envío (contiene 888)
+POST http://localhost:8888/api/saga/start
+Content-Type: application/json
+
+{
+  "pedidoId": "PEDIDO_888_ERROR", 
+  "clienteId": "CLIENTE_123",
+  "productoId": "PRODUCTO_888",
+  "cantidad": 2,
+  "precio": 150.00
+}
+
+# Caso 4: Error en notificación (contiene 777)
+POST http://localhost:8888/api/saga/start
+Content-Type: application/json
+
+{
+  "pedidoId": "PEDIDO_777_ERROR", 
+  "clienteId": "CLIENTE_123",
+  "productoId": "PRODUCTO_777",
+  "cantidad": 2,
+  "precio": 150.00
+}
