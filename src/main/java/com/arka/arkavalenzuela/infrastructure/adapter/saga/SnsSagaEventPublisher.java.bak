@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.sns.model.PublishResponse;
  * Adaptador para publicar eventos en Amazon SNS
  */
 @Component
+@ConditionalOnProperty(name = "aws.mock.enabled", havingValue = "false")
 public class SnsSagaEventPublisher implements SagaEventPublisher {
     
     private static final Logger logger = LoggerFactory.getLogger(SnsSagaEventPublisher.class);
