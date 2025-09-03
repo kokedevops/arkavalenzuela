@@ -47,7 +47,14 @@ subprojects {
 		implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
 		implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 		implementation 'org.springframework.security:spring-security-crypto'
-		
+		implementation 'software.amazon.awssdk:regions:2.33.0'
+
+		implementation 'software.amazon.awssdk:s3:2.25.18'
+		implementation 'software.amazon.awssdk:core:2.25.18'
+		implementation 'software.amazon.awssdk:regions:2.25.18'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+				
 		testImplementation 'org.springframework.boot:spring-boot-starter-test'
 		testImplementation 'org.springframework.security:spring-security-test'
 		testImplementation 'io.projectreactor:reactor-test'
@@ -79,6 +86,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'software.amazon.awssdk:regions:2.33.0'
+	implementation 'software.amazon.awssdk:s3:2.25.18'
+	implementation 'software.amazon.awssdk:core:2.25.18'
+	implementation 'software.amazon.awssdk:regions:2.25.18'
 	// implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc' // Comentado temporalmente
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
