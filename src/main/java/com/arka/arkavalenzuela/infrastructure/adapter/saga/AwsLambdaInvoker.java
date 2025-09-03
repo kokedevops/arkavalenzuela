@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.core.SdkBytes;
@@ -21,8 +22,10 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Adaptador para invocar funciones AWS Lambda
+ * Se activa cuando aws.mock.enabled=false
  */
 @Component
+@ConditionalOnProperty(name = "aws.mock.enabled", havingValue = "false")
 public class AwsLambdaInvoker implements LambdaInvoker {
     
     private static final Logger logger = LoggerFactory.getLogger(AwsLambdaInvoker.class);
