@@ -111,8 +111,7 @@ dependencies {
 	
 	// Database dependencies
 	runtimeOnly 'com.mysql:mysql-connector-j'
-	testImplementation 'com.h2database:h2'
-	testRuntimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.h2database:h2'  // H2 para desarrollo local
 	
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
